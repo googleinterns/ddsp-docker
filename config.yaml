@@ -1,0 +1,19 @@
+trainingInput:
+  scaleTier: CUSTOM
+  masterType: complex_model_m_gpu
+  # Configure a master worker with 4 T4 GPUs
+  # masterType: n1-highcpu-16
+  # masterConfig:
+  #   acceleratorConfig:
+  #     count: 2
+  #     type: NVIDIA_TESLA_K80
+  # # Configure 1 workers, each with 2 T4 GPUs
+  # workerCount: 1
+  # workerType: n1-highcpu-16
+  # workerConfig:
+  #   acceleratorConfig:
+  #     count: 2
+  #     type: NVIDIA_TESLA_K80
+  # # Configure 3 parameter servers with no GPUs
+  # parameterServerCount: 3
+  # parameterServerType: n1-highmem-8
