@@ -65,6 +65,8 @@ import gin
 import pkg_resources
 import tensorflow.compat.v2 as tf
 
+import helper_functions
+
 FLAGS = flags.FLAGS
 
 # Program flags.
@@ -83,6 +85,9 @@ flags.DEFINE_multi_string('gpu', [],
 flags.DEFINE_boolean('allow_memory_growth', False,
                      'Whether to grow the GPU memory usage as is needed by the '
                      'process. Prevents crashes on GPUs with smaller memory.')
+
+flags.DEFINE_enum('strategy', 'one_worker', ['one_worker', 'multiple_workers'],
+                  'Wheter to train using one worker or multiple workers')
 
 # Gin config flags.
 flags.DEFINE_multi_string('gin_search_path', [],
@@ -159,10 +164,13 @@ def main(unused_argv):
 
   # Training.
   if FLAGS.mode == 'train':
-   # strategy = train_util.get_strategy(tpu=FLAGS.tpu, gpus=FLAGS.gpu)
-   # strategy=tf.distribute.experimental.MultiWorkerMirroredStrategy(tf.distribute.experimental.CollectiveCommunication.AUTO)
-    strategy=tf.distribute.experimental.MultiWorkerMirroredStrategy()
-   # logging.info('Cluster spec: %s', strategy.cluster_resolver.cluster_spec())
+    # if FLAGS.strategy == 'one_worker':
+    #   strategy = train_util.get_strategy(tpu=FLAGS.tpu, gpus=FLAGS.gpu)
+    # elif FLAGS.strategy == 'multiple_workers':
+    #   strategy=tf.distribute.experimental.MultiWorkerMirroredStrategy()
+
+    strategy = helper_functions.get_strategy(tpu=FLAGS.tpu, gpus=FLAGS.gpu)
+
     logging.info('Strategy: %s', restore_dir)
     with strategy.scope():
       model = models.get_model()
