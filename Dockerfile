@@ -29,6 +29,7 @@ RUN echo '[GoogleCompute]\nservice_account = default' > /etc/boto.cfg
 
 RUN mkdir /root/trainer
 COPY trainer/ddsp_run_multiple_vms.py /root/trainer/ddsp_run_multiple_vms.py
+COPY trainer/helper_functions.py /root/trainer/helper_functions.py
 
 RUN mkdir /root/trainer/gin && mkdir /root/trainer/gin/optimization
 COPY ./trainer/gin/optimization/base.gin /root/trainer/gin/optimization/base.gin
@@ -44,6 +45,7 @@ COPY ./trainer/gin/datasets/base.gin /root/trainer/gin/datasets/base.gin
 RUN mkdir /root/tmp
 RUN mkdir /root/tmp/ddsp
 
+# These parameters can be also specified as part of the job submission arguments
 ENTRYPOINT ["python", "trainer/ddsp_run_multiple_vms.py", "--mode=train", \
      "--alsologtostderr", \
      "--save_dir=gs://werror-2020.appspot.com/mvp/dist", \
