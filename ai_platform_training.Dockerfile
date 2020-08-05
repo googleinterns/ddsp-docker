@@ -36,11 +36,4 @@ ENV PATH $PATH:/root/tools/google-cloud-sdk/bin
 RUN echo '[GoogleCompute]\nservice_account = default' > /etc/boto.cfg
 
 # Set up the entry point to invoke the trainer.
-ENTRYPOINT ["ddsp_run", "--mode=train", "--alsologtostderr", "--save_dir=gs://ddsp_training/model_5k_gpu",\
-  "--gin_file=models/solo_instrument.gin",\
-  "--gin_file=datasets/tfrecord.gin",\
-  "--gin_param=TFRecordProvider.file_pattern='gs://ddsp_training/data/train.tfrecord*'",\
-  "--gin_param=batch_size=16",\
-  "--gin_param=train_util.train.num_steps=5000",\
-  "--gin_param=train_util.train.steps_per_save=300",\
-  "--gin_param=trainers.Trainer.checkpoints_to_keep=10"]
+ENTRYPOINT ["ddsp_run"]

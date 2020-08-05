@@ -19,15 +19,12 @@ RUN apt-get install -y tree
 
 RUN mkdir ~/data
 RUN mkdir ~/model
+RUN mkdir /root/tmp
+RUN mkdir /root/tmp/ddsp
 
-COPY ./data/ddsp_training/data ~/data
+# Copies dataset into the docker image
+ARG data_path
+COPY $data_path ~/data
 
 # Set up the entry point to invoke the trainer.
-ENTRYPOINT ["ddsp_run", "--mode=train", "--alsologtostderr", "--save_dir=~/model",\
-  "--gin_file=models/solo_instrument.gin",\
-  "--gin_file=datasets/tfrecord.gin",\
-  "--gin_param=TFRecordProvider.file_pattern='~/data/train.tfrecord*'",\
-  "--gin_param=batch_size=16",\
-  "--gin_param=train_util.train.num_steps=1",\
-  "--gin_param=train_util.train.steps_per_save=1",\
-  "--gin_param=trainers.Trainer.checkpoints_to_keep=1"]
+ENTRYPOINT ["ddsp_run", "--gin_param=TFRecordProvider.file_pattern='~/data/train.tfrecord*'"]
