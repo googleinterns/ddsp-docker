@@ -4,8 +4,9 @@ WORKDIR /root
 # Installs sndfile library for reading and writing audio files 
 RUN apt-get update && apt-get install -y libsndfile-dev
 
-# Instals ddsp library and upgrade tensorflow
-RUN pip install --upgrade pip && pip install --upgrade tensorflow && pip install --upgrade ddsp
+# Instals Magenta DDSP library and upgrade Tensorflow
+# Newer version of Tensorflow is needed for multiple VMs training
+RUN pip install --upgrade pip && pip install --upgrade tensorflow ddsp
 RUN pip show tensorflow
 
 # Installs google cloud sdk, this is mostly for using gsutil to export model.
@@ -24,13 +25,16 @@ RUN wget -nv \
 
 # Path configuration
 ENV PATH $PATH:/root/tools/google-cloud-sdk/bin
-# Make sure gsutil will use the default service account
+# Makes sure gsutil will use the default service account
 RUN echo '[GoogleCompute]\nservice_account = default' > /etc/boto.cfg
 
+# Copies additional source code
 RUN mkdir /root/trainer
 COPY trainer/ddsp_run_multiple_vms.py /root/trainer/ddsp_run_multiple_vms.py
 COPY trainer/helper_functions.py /root/trainer/helper_functions.py
+COPY trainer/train_util.py /root/trainer/train_util.py
 
+# Copies default gin configuration files
 RUN mkdir /root/trainer/gin && mkdir /root/trainer/gin/optimization
 COPY ./trainer/gin/optimization/base.gin /root/trainer/gin/optimization/base.gin
 
@@ -42,8 +46,8 @@ RUN mkdir /root/trainer/gin/datasets
 COPY ./trainer/gin/datasets/tfrecord.gin /root/trainer/gin/datasets/tfrecord.gin
 COPY ./trainer/gin/datasets/base.gin /root/trainer/gin/datasets/base.gin
 
-RUN mkdir /root/tmp
-RUN mkdir /root/tmp/ddsp
+# RUN mkdir /root/tmp
+# RUN mkdir /root/tmp/ddsp
 
 # These parameters can be also specified as part of the job submission arguments
 ENTRYPOINT ["python", "trainer/ddsp_run_multiple_vms.py", "--mode=train", \
@@ -51,10 +55,6 @@ ENTRYPOINT ["python", "trainer/ddsp_run_multiple_vms.py", "--mode=train", \
      "--save_dir=gs://werror-2020.appspot.com/mvp/dist", \
      "--gin_file=models/solo_instrument.gin", \
      "--gin_file=datasets/tfrecord.gin", \
-     "--gin_param=TFRecordProvider.file_pattern='gs://werror-2020.appspot.com/mvp/data/train.tfrecord*'", \
-     "--gin_param=batch_size=16", \
-     "--gin_param=train_util.train.num_steps=128", \
-     "--gin_param=train_util.train.steps_per_save=64", \
-     "--gin_param=trainers.Trainer.checkpoints_to_keep=10"]
+     "--gin_param=TFRecordProvider.file_pattern='gs://werror-2020.appspot.com/mvp/data/train.tfrecord*'"]
 
 

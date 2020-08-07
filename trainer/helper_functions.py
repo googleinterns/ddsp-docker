@@ -3,6 +3,7 @@ import os
 from absl import logging
 from ddsp.training import train_util
 import tensorflow.compat.v2 as tf
+from google.cloud import storage
 
 def get_strategy(tpu='', gpus=None):
     """Chooses a distribution strategy.
@@ -36,3 +37,28 @@ def get_strategy(tpu='', gpus=None):
         strategy = train_util.get_strategy(tpu=tpu, gpus=gpus)
 
     return strategy
+
+def copy_config_file_from_gstorage(gstorage_path, container_path):
+    """Downloads configuration path from the bucket to the container.
+
+    Args:
+        gstorage_path: 
+            Path to the file inside the bucket that needs to be downloaded.
+            Format: gs://bucket-name/path/to/file.txt
+        container_path: 
+            Path inside the container where downloaded file should be stored.
+    """
+
+    gstorage_path = gstorage_path.strip('gs:/')
+    bucket_name = gstorage_path.split('/')[0]
+    blob_name = os.path.relpath(gstorage_path, bucket_name)
+
+    print(bucket_name, blob_name)
+
+    storage_client = storage.Client()
+
+    bucket = storage_client.bucket(bucket_name)
+    blob = bucket.blob(blob_name)
+
+    blob.download_to_filename(container_path)
+    logging.info('Downloaded config file inside the container. Current location: %s', container_path)

@@ -59,13 +59,14 @@ from absl import flags
 from absl import logging
 from ddsp.training import eval_util
 from ddsp.training import models
-from ddsp.training import train_util
+# from ddsp.training import train_util
 from ddsp.training import trainers
 import gin
 import pkg_resources
 import tensorflow.compat.v2 as tf
 
 import helper_functions
+import train_util
 
 FLAGS = flags.FLAGS
 
@@ -103,6 +104,8 @@ flags.DEFINE_integer('initial_delay_secs', None,
 
 GIN_PATH = pkg_resources.resource_filename(__name__, 'gin')
 
+LAST_OPERATIVE_CONFIG_PATH = '/root/trainer/gin/last_config.gin'
+
 
 def delay_start():
   """Optionally delay the start of the run."""
@@ -128,8 +131,10 @@ def parse_gin(restore_dir):
     # Load operative_config if it exists (model has already trained).
     operative_config = train_util.get_latest_operative_config(restore_dir)
     if tf.io.gfile.exists(operative_config):
+      # Copy the config file from gstorage
+      helper_functions.copy_config_file_from_gstorage(operative_config, LAST_SNAPSHOT_PATH)
       logging.info('Using operative config: %s', operative_config)
-      gin.parse_config_file(operative_config, skip_unknown=True)
+      gin.parse_config_file(LAST_OPERATIVE_CONFIG_PATH, skip_unknown=True)
 
     # User gin config and user hyperparameters from flags.
     gin.parse_config_files_and_bindings(
@@ -165,11 +170,11 @@ def main(unused_argv):
   # Training.
   if FLAGS.mode == 'train':
     # if FLAGS.strategy == 'one_worker':
-    #   strategy = train_util.get_strategy(tpu=FLAGS.tpu, gpus=FLAGS.gpu)
+    strategy = train_util.get_strategy(tpu=FLAGS.tpu, gpus=FLAGS.gpu)
     # elif FLAGS.strategy == 'multiple_workers':
     #   strategy=tf.distribute.experimental.MultiWorkerMirroredStrategy()
 
-    strategy = helper_functions.get_strategy(tpu=FLAGS.tpu, gpus=FLAGS.gpu)
+    # strategy = helper_functions.get_strategy(tpu=FLAGS.tpu, gpus=FLAGS.gpu)
 
     logging.info('Strategy: %s', restore_dir)
     with strategy.scope():
