@@ -132,7 +132,7 @@ def parse_gin(restore_dir):
     operative_config = train_util.get_latest_operative_config(restore_dir)
     if tf.io.gfile.exists(operative_config):
       # Copy the config file from gstorage
-      helper_functions.copy_config_file_from_gstorage(operative_config, LAST_SNAPSHOT_PATH)
+      helper_functions.copy_config_file_from_gstorage(operative_config, LAST_OPERATIVE_CONFIG_PATH)
       logging.info('Using operative config: %s', operative_config)
       gin.parse_config_file(LAST_OPERATIVE_CONFIG_PATH, skip_unknown=True)
 
@@ -170,11 +170,11 @@ def main(unused_argv):
   # Training.
   if FLAGS.mode == 'train':
     # if FLAGS.strategy == 'one_worker':
-    strategy = train_util.get_strategy(tpu=FLAGS.tpu, gpus=FLAGS.gpu)
+    #   strategy = train_util.get_strategy(tpu=FLAGS.tpu, gpus=FLAGS.gpu)
     # elif FLAGS.strategy == 'multiple_workers':
     #   strategy=tf.distribute.experimental.MultiWorkerMirroredStrategy()
 
-    # strategy = helper_functions.get_strategy(tpu=FLAGS.tpu, gpus=FLAGS.gpu)
+    strategy = helper_functions.get_strategy(tpu=FLAGS.tpu, gpus=FLAGS.gpu)
 
     logging.info('Strategy: %s', restore_dir)
     with strategy.scope():
