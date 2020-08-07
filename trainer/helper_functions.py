@@ -31,7 +31,7 @@ def get_strategy(tpu='', gpus=None):
     # in the cluster section. If there are any other workers specified MultiWorker
     # strategy needs to be chosen.
     if len(tf_config_dict["cluster"]) > 1:
-        strategy = strategy=tf.distribute.experimental.MultiWorkerMirroredStrategy()
+        strategy = tf.distribute.experimental.MultiWorkerMirroredStrategy()
         logging.info('Cluster spec: %s', strategy.cluster_resolver.cluster_spec())
     else:
         strategy = train_util.get_strategy(tpu=tpu, gpus=gpus)
