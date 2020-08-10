@@ -27,16 +27,19 @@ def get_strategy(tpu='', gpus=None):
         A distribution strategy.
     """
     
-    tf_config_str = os.environ.get('TF_CONFIG')
-    logging.info("TFRecord %s", tf_config_str)
-    tf_config_dict = json.loads(tf_config_str)
+    if 'TF_CONFIG' in os.environ:
+        tf_config_str = os.environ.get('TF_CONFIG')
+        logging.info("TFRecord %s", tf_config_str)
+        tf_config_dict = json.loads(tf_config_str)
 
-    # Exactly one chief worker is always specified inside the TF_CONFIG variable
-    # in the cluster section. If there are any other workers specified MultiWorker
-    # strategy needs to be chosen.
-    if len(tf_config_dict["cluster"]) > 1:
-        strategy = tf.distribute.experimental.MultiWorkerMirroredStrategy()
-        logging.info('Cluster spec: %s', strategy.cluster_resolver.cluster_spec())
+        # Exactly one chief worker is always specified inside the TF_CONFIG variable
+        # in the cluster section. If there are any other workers specified MultiWorker
+        # strategy needs to be chosen.
+        if len(tf_config_dict["cluster"]) > 1:
+            strategy = tf.distribute.experimental.MultiWorkerMirroredStrategy()
+            logging.info('Cluster spec: %s', strategy.cluster_resolver.cluster_spec())
+        else:
+            strategy = train_util.get_strategy(tpu=tpu, gpus=gpus)
     else:
         strategy = train_util.get_strategy(tpu=tpu, gpus=gpus)
 
