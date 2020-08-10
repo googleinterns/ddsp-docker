@@ -4,12 +4,12 @@ WORKDIR /root
 # Installs sndfile library for reading and writing audio files 
 RUN apt-get update && apt-get install -y libsndfile-dev
 
-# Instals Magenta DDSP library and upgrade Tensorflow
+# Installs Magenta DDSP library and upgrades Tensorflow
 # Newer version of Tensorflow is needed for multiple VMs training
 RUN pip install --upgrade pip && pip install --upgrade tensorflow ddsp
 RUN pip show tensorflow
 
-# Installs google cloud sdk, this is mostly for using gsutil to export model.
+# Installs Google Cloud SDK, this is mostly for using gsutil to copy the configs.
 RUN wget -nv \
     https://dl.google.com/dl/cloudsdk/release/google-cloud-sdk.tar.gz && \
     mkdir /root/tools && \
@@ -32,7 +32,8 @@ RUN echo '[GoogleCompute]\nservice_account = default' > /etc/boto.cfg
 RUN mkdir /root/trainer
 COPY trainer/ddsp_run_multiple_vms.py /root/trainer/ddsp_run_multiple_vms.py
 COPY trainer/helper_functions.py /root/trainer/helper_functions.py
-COPY trainer/train_util.py /root/trainer/train_util.py
+COPY trainer/magenta_ddsp_internals/train_util.py /root/trainer/magenta_ddsp_internals/train_util.py
+COPY trainer/magenta_ddsp_internals/trainers.py /root/trainer/magenta_ddsp_internals/trainers.py
 
 # Copies default gin configuration files
 RUN mkdir /root/trainer/gin && mkdir /root/trainer/gin/optimization
@@ -46,15 +47,14 @@ RUN mkdir /root/trainer/gin/datasets
 COPY ./trainer/gin/datasets/tfrecord.gin /root/trainer/gin/datasets/tfrecord.gin
 COPY ./trainer/gin/datasets/base.gin /root/trainer/gin/datasets/base.gin
 
-# RUN mkdir /root/tmp
-# RUN mkdir /root/tmp/ddsp
+RUN mkdir /root/tmp
+RUN mkdir /root/tmp/ddsp
 
 # These parameters can be also specified as part of the job submission arguments
 ENTRYPOINT ["python", "trainer/ddsp_run_multiple_vms.py", "--mode=train", \
      "--alsologtostderr", \
-     "--save_dir=gs://werror-2020.appspot.com/mvp/dist", \
      "--gin_file=models/solo_instrument.gin", \
-     "--gin_file=datasets/tfrecord.gin", \
-     "--gin_param=TFRecordProvider.file_pattern='gs://werror-2020.appspot.com/mvp/data/train.tfrecord*'"]
+     "--gin_file=datasets/tfrecord.gin"]
+
 
 

@@ -1,3 +1,6 @@
+"""Helper functions for interatcing with Magenta DDSP internals.
+"""
+
 import json
 import os
 from absl import logging
@@ -25,6 +28,7 @@ def get_strategy(tpu='', gpus=None):
     """
     
     tf_config_str = os.environ.get('TF_CONFIG')
+    logging.info("TFRecord %s", tf_config_str)
     tf_config_dict = json.loads(tf_config_str)
 
     # Exactly one chief worker is always specified inside the TF_CONFIG variable
