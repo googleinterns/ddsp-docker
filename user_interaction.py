@@ -46,7 +46,7 @@ imageURI = raw_input("\nPlease insert a IMAGE URI:")
 
 configPath = raw_input("\nPlease insert the path to a configuration file:")
 
-os.system("export PATH=/usr/local/google/home/anasimionescu/.local/bin:$PATH")
+os.system("export PATH=/usr/local/google/home/$USER/.local/bin:$PATH")
 
 if place == 1:
     #Building the image
@@ -57,13 +57,13 @@ if place == 1:
 
     # Run the image locally
     runCommand = "docker run " + imageURI + " --mode=" + mode + " --save_dir=" + storingPath\
-                    + " --alsologtostderr"\
-                    + " --gin_file=models/solo_instrument.gin"\
-                    + " --gin_file=datasets/tfrecord.gin"\
-                    + " --gin_param=batch_size=16"\
-                    + " --gin_param=train_util.train.num_steps=1"\
-                    + " --gin_param=train_util.train.steps_per_save=1"\
-                    + " --gin_param=trainers.Trainer.checkpoints_to_keep=1"
+    + " --alsologtostderr"\
+    + " --gin_file=models/solo_instrument.gin"\
+    + " --gin_file=datasets/tfrecord.gin"\
+    + " --gin_param=batch_size=16"\
+    + " --gin_param=train_util.train.num_steps=1"\
+    + " --gin_param=train_util.train.steps_per_save=1"\
+    + " --gin_param=trainers.Trainer.checkpoints_to_keep=1"
     print("Running image...")
     os.system(runCommand)
 
@@ -89,14 +89,18 @@ elif place == 2:
     # Submit the job on AI Platform
     print("Submitting the job on AI Platform")
     submitting_job = "gcloud beta ai-platform jobs submit training " + jobName\
-    + " --region europe-west1 --master-image-uri " + imageURI + " --config " + configPath + " -- --mode=" + mode\
+    + " --region europe-west4 --master-image-uri " + imageURI + " --config " + configPath + " -- --mode=" + mode\
     + " --save_dir=" + storingPath\
     + " --alsologtostderr"\
     + " --gin_file=models/solo_instrument.gin"\
     + " --gin_file=datasets/tfrecord.gin"\
     + " --gin_param=\"TFRecordProvider.file_pattern='" + dataPath + "/train.tfrecord*'\""\
     + " --gin_param=magenta_ddsp_internals.trainers.Trainer.checkpoints_to_keep=10"\
-   # + " --gin_param=early_stop_loss_value=5"
+    + " --gin_param=early_stop_loss_value=5"\
+    + " --gin_param=magenta_ddsp_internals.train_util.train.batch_size=64"\
+    + " --gin_param=magenta_ddsp_internals.train_util.train.num_steps=10000"\
+    + " --gin_param=magenta_ddsp_internals.train_util.train.steps_per_summary=300"\
+    + " --gin_param=magenta_ddsp_internals.train_util.train.steps_per_save=300"
     os.system(submitting_job)
 
     # Enabling Tensorboard
