@@ -21,6 +21,7 @@ import time
 from absl import logging
 import gin
 import tensorflow.compat.v2 as tf
+import hypertune
 
 
 
@@ -176,6 +177,7 @@ def train(data_provider,
       log_str = 'step: {}\t'.format(int(step.numpy()))
       for k, v in losses.items():
         log_str += '{}: {:.2f}\t'.format(k, v)
+        loss_report = v
       logging.info(log_str)
 
       # Write Summaries.
@@ -189,6 +191,13 @@ def train(data_provider,
         for k, metric in avg_losses.items():
           tf.summary.scalar('losses/{}'.format(k), metric.result(), step=step)
           metric.reset_states()
+
+      # Uses hypertune to report metrics for hyperparameter tuning.
+      hpt = hypertune.HyperTune()
+      hpt.report_hyperparameter_tuning_metric(
+              hyperparameter_metric_tag='my_loss',
+              metric_value=loss_report,
+              global_step=step)
 
       # Save Model.
       if step % steps_per_save == 0:
