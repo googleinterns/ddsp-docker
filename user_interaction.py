@@ -32,7 +32,7 @@ while True:
 print("You chose to " + mode + " " + placeOptions[place] + "\n")
 
 # Determining path for data retrieval
-dataPath = raw_input("Please insert a path for data retrieving. This can be a local directory or a GCS Bucket:")
+dataPath = raw_input("Please insert a path for data retrieving. This can be a local directory or a GCS Bucket:\n")
 
 # Determining path for storing model, snapshots and summaries
 storingPath = raw_input("\nPlease insert a path for storing the model, snapshots and summaries.\
@@ -44,7 +44,8 @@ recoveryPath = raw_input("\nPlease insert path for recovering a snapshot or a co
 
 imageURI = raw_input("\nPlease insert a IMAGE URI:")
 
-# docker build -f local_training.Dockerfile -t gcr.io/anasimionescu-2020/ddsp-training:train-job ./
+configPath = raw_input("\nPlease insert the path to a configuration file:")
+
 os.system("export PATH=/usr/local/google/home/anasimionescu/.local/bin:$PATH")
 
 if place == 1:
@@ -88,16 +89,14 @@ elif place == 2:
     # Submit the job on AI Platform
     print("Submitting the job on AI Platform")
     submitting_job = "gcloud beta ai-platform jobs submit training " + jobName\
-    + " --region europe-west1 --master-image-uri " + imageURI + " --config config.yaml -- --mode=" + mode\
+    + " --region europe-west1 --master-image-uri " + imageURI + " --config " + configPath + " -- --mode=" + mode\
     + " --save_dir=" + storingPath\
     + " --alsologtostderr"\
     + " --gin_file=models/solo_instrument.gin"\
     + " --gin_file=datasets/tfrecord.gin"\
-    + " --gin_param=TFRecordProvider.file_pattern='" + dataPath + "/train.tfrecord*'"\
-    + " --gin_param=batch_size=16"\
-    + " --gin_param=train_util.train.num_steps=10000"\
-    + " --gin_param=train_util.train.steps_per_save=300"\
-    + " --gin_param=trainers.Trainer.checkpoints_to_keep=10"
+    + " --gin_param=\"TFRecordProvider.file_pattern='" + dataPath + "/train.tfrecord*'\""\
+    + " --gin_param=magenta_ddsp_internals.trainers.Trainer.checkpoints_to_keep=10"\
+   # + " --gin_param=early_stop_loss_value=5"
     os.system(submitting_job)
 
     # Enabling Tensorboard
