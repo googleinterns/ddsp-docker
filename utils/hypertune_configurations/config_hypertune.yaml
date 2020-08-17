@@ -1,17 +1,23 @@
 trainingInput:
-  scaleTier: BASIC_GPU
+  scaleTier: CUSTOM
   # Configure a master worker with 4 K80 GPUs
-  # masterType: n1-highmem-64
-  # masterConfig:
-  #   acceleratorConfig:
-  #     count: 4
-  #     type: nvidia-tesla-t4
-  # useChiefInTfConfig: True
+  masterType: n1-highcpu-16
+  masterConfig:
+     acceleratorConfig:
+       count: 2
+       type: nvidia-tesla-t4
+  workerCount: 3
+  workerType: n1-highcpu-16
+  workerConfig:
+     acceleratorConfig:
+       count: 2
+       type: nvidia-tesla-t4
+  useChiefInTfConfig: True
   hyperparameters:
     goal: MINIMIZE
     hyperparameterMetricTag: "my_loss"
     maxTrials: 4
-    maxParallelTrials: 4
+    maxParallelTrials: 1
     enableTrialEarlyStopping: True
     params:
     - parameterName: gin_param=learning_rate
@@ -21,11 +27,11 @@ trainingInput:
       - 0.001
       - 0.01
       - 0.1
-    - parameterName: gin_param=batch_size
-      type: DISCRETE
-      discreteValues:
-      - 8
-      - 16
-      - 32
-      - 64
-      - 128
+#    - parameterName: gin_param=batch_size
+#      type: DISCRETE
+#      discreteValues:
+#      - 8
+#      - 16
+#      - 32
+#      - 64
+#      - 128
