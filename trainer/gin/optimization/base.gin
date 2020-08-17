@@ -14,6 +14,7 @@ magenta_ddsp_internals.train_util.train.steps_per_summary = 32
 magenta_ddsp_internals.train_util.train.steps_per_save = 32
 magenta_ddsp_internals.train_util.train.early_stop_loss_value = 5
 
+
 magenta_ddsp_internals.trainers.Trainer.learning_rate = %learning_rate
 magenta_ddsp_internals.trainers.Trainer.lr_decay_steps = 10000
 magenta_ddsp_internals.trainers.Trainer.lr_decay_rate = 0.98
