@@ -9,9 +9,9 @@ RUN apt-get update && apt-get install -y libsndfile-dev
 RUN pip install --upgrade pip && pip install --upgrade tensorflow tensorflow-probability
 RUN pip show tensorflow
 
-RUN wget https://github.com/werkaaa/ddsp/archive/93139bb0e8696d2a2f442893384374a2dc56aee5.zip
-RUN unzip 93139bb0e8696d2a2f442893384374a2dc56aee5.zip
-RUN cd ddsp-93139bb0e8696d2a2f442893384374a2dc56aee5 && python setup.py install
+RUN wget https://github.com/werkaaa/ddsp/archive/ddsp_run_change.zip
+RUN unzip ddsp_run_change.zip
+RUN cd ddsp-ddsp_run_change && python setup.py install
 
 # Copies running script
 COPY task.py task.py

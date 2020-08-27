@@ -1,13 +1,11 @@
-"""
-This script is still developed.
-"""
+"""Script for running a containerised training job on Google Cloud AI Platform."""
 
 import json
 import os
+import subprocess
 
 from absl import app
 from absl import flags
-from absl import logging
 
 FLAGS = flags.FLAGS
 
@@ -17,44 +15,88 @@ flags.DEFINE_string('save_dir', None,
 flags.DEFINE_string('restore_dir', '',
                     'Path from which checkpoints will be restored before '
                     'training. Can be different than the save_dir.')
-flags.DEFINE_string('data_pattern', None, "Data pattern")
-flags.DEFINE_integer('num_steps', 30000, 'NUmber of training steps')
-flags.DEFINE_float('early_stop_loss_value', 5.0, 'Early stopping. When the total_loss '
-                   'reaches below this value training stops.')
+flags.DEFINE_string('file_pattern', None, "Data file pattern")
+
 flags.DEFINE_integer('batch_size', 32, 'Batch size')
 flags.DEFINE_float('learning_rate', 0.003, 'Learning rate')
+flags.DEFINE_integer('num_steps', 30000, 'Number of training steps')
+flags.DEFINE_float('early_stop_loss_value', 5.0, 'Early stopping. When the total_loss '
+                   'reaches below this value training stops.')
+
 flags.DEFINE_integer('steps_per_summary', 300, 'Steps per summary')
 flags.DEFINE_integer('steps_per_save', 300, 'Steps per save')
+flags.DEFINE_boolean('hypertune', False,
+                     'Enable metric reporting for hyperparameter tuning.')
 
+
+flags.DEFINE_multi_string('gin_search_path', [],
+                          'Additional gin file search paths. '
+                          'Must be paths inside Docker container and '
+                          'necessary gin configs should be added at the '
+                          'Docker image building stage.')
+flags.DEFINE_multi_string('gin_file', [],
+                          'List of paths to the config files. If file '
+                          'in gstorage bucket specify whole gstorage path: '
+                          'gs://bucket-name/dir/in/bucket/file.gin. If path '
+                          'should be local remember about copying the file inside '
+                          'the Docker container at building stage. ')
+flags.DEFINE_multi_string('gin_param', [],
+                          'Newline separated list of Gin parameter bindings.')
+
+
+
+def get_worker_behavior_info():
+  """Infers worker behavior from the environment.""" 
+  if 'TF_CONFIG' in os.environ:
+    cluster_config = os.environ['TF_CONFIG']
+    cluster_config_dict = json.loads(cluster_config)
+    if len(cluster_config_dict['cluster']) == 1:
+      save_dir = ''
+      cluster_config = ''
+    elif cluster_config_dict['task']['type'] != 'chief':
+      save_dir = ''
+    else:
+      save_dir = FLAGS.save_dir
+  else:
+    save_dir = FLAGS.save_dir
+    cluster_config = ''
+
+  return cluster_config, save_dir
+
+
+def parse_list_params(list_of_params, param_name):
+  return [f'--{param_name}={param}' for param in list_of_params]
 
 
 def main(unused_argv):
-  flags.mark_flag_as_required('data_pattern')
-  flags.mark_flag_as_required('save_dir')
-    
-  cluster_config = ''
+  restore_dir = FLAGS.save_dir if not FLAGS.restore_dir else FLAGS.restore_dir
 
-  os.system(("ddsp_run "
-             "--mode=train "
-             "--alsologtostderr "
-             "--gin_file=models/solo_instrument.gin "
-             "--gin_file=datasets/tfrecord.gin "
-             f"--cluster_config='{cluster_config}' "
-             f"--save_dir='{FLAGS.save_dir}' "
-             f"--restore_dir='{FLAGS.restore_dir}' "
-             f"--gin_param=batch_size={FLAGS.batch_size} "
-             f"--gin_param=learning_rate={FLAGS.learning_rate} "
-             f"--gin_param=\"TFRecordProvider.file_pattern='{FLAGS.data_pattern}'\" "
-             f"--gin_param=train_util.train.num_steps={FLAGS.num_steps} "
-             f"--gin_param=train_util.train.steps_per_save={FLAGS.steps_per_save} "
-             f"--gin_param=train_util.train.steps_per_summary={FLAGS.steps_per_summary} "))
+  cluster_config, save_dir = get_worker_behavior_info()
+  gin_search_path = parse_list_params(FLAGS.gin_search_path, 'gin_search_path')
+  gin_file = parse_list_params(FLAGS.gin_file, 'gin_file')
+  gin_param = parse_list_params(FLAGS.gin_param, 'gin_param')
 
+  ddsp_run_command = (
+      ["ddsp_run",
+       "--mode=train",
+       "--alsologtostderr",
+       "--gin_file=models/solo_instrument.gin",
+       "--gin_file=datasets/tfrecord.gin",
+       f"--cluster_config={cluster_config}",
+       f"--save_dir={save_dir}",
+       f"--restore_dir={restore_dir}",
+       f"--hypertune={FLAGS.hypertune}",
+       f"--gin_param=batch_size={FLAGS.batch_size}",
+       f"--gin_param=learning_rate={FLAGS.learning_rate}",
+       f"--gin_param=TFRecordProvider.file_pattern='{FLAGS.file_pattern}'",
+       f"--gin_param=train_util.train.num_steps={FLAGS.num_steps}",
+       f"--gin_param=train_util.train.steps_per_save={FLAGS.steps_per_save}",
+       f"--gin_param=train_util.train.steps_per_summary={FLAGS.steps_per_summary}"] 
+      + gin_search_path + gin_file + gin_param)
 
-
-def console_entry_point():
-  """From pip installed script."""
-  app.run(main)
-
+  subprocess.run(args=ddsp_run_command, check=True)
 
 if __name__ == '__main__':
-  console_entry_point()
+  flags.mark_flag_as_required('file_pattern')
+  flags.mark_flag_as_required('save_dir')
+  app.run(main)
