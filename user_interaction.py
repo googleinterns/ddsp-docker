@@ -14,9 +14,6 @@ restore_dir = raw_input('\nInsert a path from which checkpoints will'
 if restore_dir == "":
     restore_dir = save_dir
 
-gin_path = raw_input('\nInsert an additional gin file search path or skip'
-'for only using the default paths:\n')
-
 config_path = raw_input('\nInsert the path to a configuration file'
 ' or skip for the default one:')
 
@@ -68,10 +65,10 @@ steps_per_summary = raw_input('\nInsert the number of steps per summary'
 if steps_per_summary == "":
     steps_per_summary = "300"
 
-no_of_checkpoints = raw_input('\nInsert the number of checkpoints to '
+checkpoints_to_keep = raw_input('\nInsert the number of checkpoints to '
 'keep or skip for the default value (10):')
-if no_of_checkpoints == "":
-    no_of_checkpoints = "10"
+if checkpoints_to_keep == "":
+    checkpoints_to_keep = "10"
 
 early_stop_loss_value = raw_input('\nInsert the early stop loss value'
 ' or skip for the default value (5):')
@@ -89,6 +86,7 @@ submitting_job = "gcloud beta ai-platform jobs submit training " + job_name\
 + " --gin_param=\"TFRecordProvider.file_pattern='" + data_path\
 + "/train.tfrecord*'\""\
 + " --gin_param=early_stop_loss_value=" + early_stop_loss_value\
++ " --gin_param=checkpoints_to_keep=" + checkpoints_to_keep\
 + " --gin_param=batch_size=" + batch_size\
 + " --gin_param=num_steps=" + no_of_steps\
 + " --gin_param=steps_per_summary=" + steps_per_summary\
