@@ -26,7 +26,7 @@ image_URI = raw_input('\nInsert a IMAGE URI.'
 os.system("export PATH=/usr/local/google/home/$USER/.local/bin:$PATH")
 
 #Building the image
-build_command = "docker build -f ai_platform_training.Dockerfile -t " + image_URI + " ./"
+build_command = "docker build -f Dockerfile -t " + image_URI + " ./"
 os.system(build_command)
 print("Docker image built")
 
@@ -81,21 +81,18 @@ if early_stop_loss_value == "":
 # Submit the job on AI Platform
 print("Submitting the job on AI Platform")
 submitting_job = "gcloud beta ai-platform jobs submit training " + job_name\
-+ " --region " + region + " --master-image-uri " + image_URI + " --config " + config_path + " -- --mode=train"\
++ " --region " + region + " --master-image-uri " + image_URI + " --config " + config_path\
 + " --save_dir=" + save_dir\
 + " --restore_dir=" + restore_dir\
-+ " --gin_search_path=" + gin_path\
-+ " --alsologtostderr"\
-+ " --hp_tuning=True"\
 + " --gin_file=models/solo_instrument.gin"\
 + " --gin_file=datasets/tfrecord.gin"\
 + " --gin_param=\"TFRecordProvider.file_pattern='" + data_path\
 + "/train.tfrecord*'\""\
 + " --gin_param=early_stop_loss_value=" + early_stop_loss_value\
-+ " --gin_param=magenta_ddsp_internals.train_util.train.batch_size=" + batch_size\
-+ " --gin_param=magenta_ddsp_internals.train_util.train.num_steps=" + no_of_steps\
-+ " --gin_param=magenta_ddsp_internals.train_util.train.steps_per_summary=" + steps_per_summary\
-+ " --gin_param=magenta_ddsp_internals.train_util.train.steps_per_save=" + steps_per_save
++ " --gin_param=batch_size=" + batch_size\
++ " --gin_param=num_steps=" + no_of_steps\
++ " --gin_param=steps_per_summary=" + steps_per_summary\
++ " --gin_param=steps_per_save=" + steps_per_save
 os.system(submitting_job)
 
 # Enabling Tensorboard
