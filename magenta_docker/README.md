@@ -19,13 +19,13 @@ If you are located outside Europe we recommend setting `$REGION` accordingly to 
 
 ```bash
 export PROJECT_ID=[YOUR_PROJECT_ID]
+export SAVE_DIR=gs://[YOUR_STORAGE_BUCKET_NAME]/[PATH_IN_STORAGE_BUCKET]
+export FILE_PATTERN=gs://[YOUR_STORAGE_BUCKET_NAME]/[PATH_IN_STORAGE_BUCKET]/train.tfrecord*
 export IMAGE_REPO_NAME=ddsp_train
 export IMAGE_TAG=ai_platform
 export IMAGE_URI=eu.gcr.io/$PROJECT_ID/$IMAGE_REPO_NAME:$IMAGE_TAG
 export REGION=europe-west4
-export SAVE_DIR=gs://[YOUR_STORAGE_BUCKET_NAME]/[PATH_IN_STORAGE_BUCKET]
 export JOB_NAME=ddsp_container_job_$(date +%Y%m%d_%H%M%S)
-export FILE_PATTERN=gs://[YOUR_STORAGE_BUCKET_NAME]/[PATH_IN_STORAGE_BUCKET]/train.tfrecord*
 ```
 #### Build the image and push it to Container Registry
 In the folder containing `Dockerfile` and `task.py` run following commands: 

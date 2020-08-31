@@ -10,3 +10,4 @@ trainingInput:
       count: 2
       type: NVIDIA_TESLA_T4
   useChiefInTfConfig: True
+  

@@ -18,3 +18,4 @@ trainingInput:
       type: NVIDIA_TESLA_T4
   # Makes AI Platform naming compatibile with Tensorflow naming
   useChiefInTfConfig: True
+  
