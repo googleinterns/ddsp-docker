@@ -90,7 +90,7 @@ tensorboard --logdir=<path_to_save_dir> --port=8080
 
 Then open your browser and go to `127.0.0.1:8080` to visualise your training.
 
-If you want to share your ML experiment results you can [TensorBoard.dev](https://tensorboard.dev/).
+If you want to share your ML experiment results you can use [TensorBoard.dev](https://tensorboard.dev/).
 You have to install the latest version of TensorBoard to use the uploader:
 
 ```bash
@@ -126,7 +126,8 @@ chmod +x user_interaction.py
 
 Then just run `./user_interaction.py` from the directory you have it saved in and follow the instructions prompted.
 
-The script will allow you to input the paths to the GCS Bucket where you have stored the preprocessed dataset and where you want to save the trained model and also choose parameters for the training job:
+The script will allow you to input the paths to the GCS Bucket where you have stored the preprocessed dataset and where you want to save the trained model and also choose parameters for the training job.
+After submitting the training job, the script also enables TensorBoard visualisation on your local machine and uploads the logs to TensorBoard.dev for easily sharing the results of your ML experiment.
 
 #### Paths
 * `data_path` - Path to where the preprocessed dataset is saved.
