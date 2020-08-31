@@ -71,7 +71,7 @@ TODO(werror): Write about prepared cluster configurations and hyperparameters
 
 ### Enabling Hyperparameter Tuning
 
-In order to run a hyperparameter tuning job on AI Platform you will have to add the following flag:
+In order to run a [hyperparameter tuning job on AI Platform](https://cloud.google.com/ai-platform/training/docs/hyperparameter-tuning-overview) you will have to add the following flag:
 
 ```bash
 --hypertune=True
@@ -108,7 +108,7 @@ The script will allow you to input the paths to the GCS Bucket where you have st
 #### Paths
 * `data_path` - Path to where the preprocessed dataset is saved.
 * `save_dir` - Path to where checkpoints and summary events will be saved.
-* `restore_dir` - Path from which checkpoints will be restored if you want to resume a training. Can be skipped and defaults to the `storing_path`.
+* `restore_dir` - Path from which checkpoints will be restored if you want to resume a training. Can be skipped and defaults to `save_dir`.
 
 #### AI Platform parameters
 * `config_path` - Path to a configuration file for training on AI Platform.
@@ -122,5 +122,4 @@ The script will allow you to input the paths to the GCS Bucket where you have st
 * `no_of_steps` - Number of steps to execute before training stops (Default: 10000).
 * `steps_per_save` - Number of steps after a snapshot is saved (Default: 300).
 * `steps_per_summary` - Number of steps after a summary is saved (Default: 300).
-* `checkpoints_to_keep` - Maximum number of checkpoints to keep in the saving directory (Will be kept the last `checkpoints_to_keep` snapshots) (Default: 10).
 * `early_stop_loss_value` - The training will be stopped before it finishes the number of steps if the loss value reaches this (Default: 5).
