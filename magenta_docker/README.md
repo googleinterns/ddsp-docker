@@ -90,6 +90,29 @@ tensorboard --logdir=<path_to_save_dir> --port=8080
 
 Then open your browser and go to `127.0.0.1:8080` to visualise your training.
 
+If you want to share your ML experiment results you can [TensorBoard.dev](https://tensorboard.dev/).
+You have to install the latest version of TensorBoard to use the uploader:
+
+```bash
+pip install -U tensorboard
+tensorboard dev upload --logdir <path_to_save_dir> \
+    --name "(optional) <name>" \
+    --description "(optional) <description>"
+```
+
+Then view your experiment on TensorBoard.dev. Follow the link provided to view your experiment, or share it with others.
+
+To get a copy of the data uploaded to TensorBoard.dev run the following command:
+
+```bash
+tensorboard dev export --outdir OUTPUT_PATH
+```
+
+To delete an experiment you've uploaded to TensorBoard.dev run the following command. You can find your experiment id in the bottom left corner on your TensorBoard.dev link:
+
+```bash
+tensorboard dev delete --experiment_id EXPERIMENT_ID
+```
 
 ### User Interaction Script:
 
