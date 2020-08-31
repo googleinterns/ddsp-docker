@@ -16,6 +16,8 @@ if restore_dir == "":
 
 config_path = raw_input('\nInsert the path to a configuration file'
 ' or skip for the default one:')
+if config_path == "":
+    config_path = "./utils/cluster_configurations/config.yaml"
 
 image_URI = raw_input('\nInsert a IMAGE URI.'
 ' The template is: gcr.io/<GCP_PROJECT_ID>/<IMAGE_REPO_NAME>:<IMAGE_TAG> :')
@@ -43,7 +45,7 @@ if region == "":
 batch_size = raw_input('\nInsert batch size'
 ' or skip for the default value (128):')
 if batch_size == "":
-    batch_size = "32"
+    batch_size = "128"
 
 learning_rate = raw_input('\nInsert the learning rate'
 ' or skip for the default value (0.001):')
@@ -65,11 +67,6 @@ steps_per_summary = raw_input('\nInsert the number of steps per summary'
 if steps_per_summary == "":
     steps_per_summary = "300"
 
-checkpoints_to_keep = raw_input('\nInsert the number of checkpoints to '
-'keep or skip for the default value (10):')
-if checkpoints_to_keep == "":
-    checkpoints_to_keep = "10"
-
 early_stop_loss_value = raw_input('\nInsert the early stop loss value'
 ' or skip for the default value (5):')
 if early_stop_loss_value == "":
@@ -79,18 +76,13 @@ if early_stop_loss_value == "":
 print("Submitting the job on AI Platform")
 submitting_job = "gcloud beta ai-platform jobs submit training " + job_name\
 + " --region " + region + " --master-image-uri " + image_URI + " --config " + config_path\
-+ " --save_dir=" + save_dir\
++ " -- --save_dir=" + save_dir\
 + " --restore_dir=" + restore_dir\
-+ " --gin_file=models/solo_instrument.gin"\
-+ " --gin_file=datasets/tfrecord.gin"\
-+ " --gin_param=\"TFRecordProvider.file_pattern='" + data_path\
-+ "/train.tfrecord*'\""\
-+ " --gin_param=early_stop_loss_value=" + early_stop_loss_value\
-+ " --gin_param=checkpoints_to_keep=" + checkpoints_to_keep\
-+ " --gin_param=batch_size=" + batch_size\
-+ " --gin_param=num_steps=" + no_of_steps\
-+ " --gin_param=steps_per_summary=" + steps_per_summary\
-+ " --gin_param=steps_per_save=" + steps_per_save
++ " --file_pattern=" + data_path + "/train.tfrecord*"\
++ " --batch_size=" + batch_size\
++ " --num_steps=" + no_of_steps\
++ " --steps_per_summary=" + steps_per_summary\
++ " --steps_per_save=" + steps_per_save
 os.system(submitting_job)
 
 # Enabling Tensorboard
@@ -98,3 +90,9 @@ print("Enabling Tensorboard")
 os.system("gcloud auth login")
 tensorboard_command = "tensorboard --logdir=" + storing_path + " --port=8082"
 os.system(tensorboard_command)
+
+# Uploading logs to TensorBoard.dev
+print("Uploading logs to TensorBoard.dev")
+tensorboard_dev_command = "tensorboard dev upload --logdir " + save_dir\
++ " --name \"" + job_name + "\""
+os.system(tensorboard_dev_command)
