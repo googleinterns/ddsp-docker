@@ -11,9 +11,9 @@ RUN apt-get update && apt-get install -y libsndfile-dev
 RUN pip install --upgrade pip && pip install --upgrade tensorflow tensorflow-probability
 
 # Installs Magenta DDSP from Github.
-RUN wget https://github.com/werkaaa/ddsp/archive/ddsp_run_change.zip
-RUN unzip ddsp_run_change.zip
-RUN cd ddsp-ddsp_run_change && python setup.py install
+RUN wget https://github.com//magenta/ddsp/archive/master.zip
+RUN unzip master.zip
+RUN cd ddsp-master && python setup.py install
 
 # Copies running script.
 COPY task.py task.py
