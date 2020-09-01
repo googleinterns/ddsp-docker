@@ -584,7 +584,7 @@ section.about {
     background: #e9e9f0;
     width: 90%;
     margin: 0 auto;
-    margin-top: -150px;
+    margin-top: 0px;
     max-width: 1300px
 }
 
@@ -1118,4 +1118,22 @@ table:not(.no-borders) tr:nth-child(odd) {
 
 .post-content .image caption {
     margin-top: 24px
+}
+
+.column {
+  float: left;
+  width: 50%;
+}
+
+/* Clear floats after the columns */
+.row:after {
+  content: "";
+  display: table;
+  clear: both;
+}
+
+@media screen and (max-width: 600px) {
+  .column {
+    width: 100%;
+  }
 }
