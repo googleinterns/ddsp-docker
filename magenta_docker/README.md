@@ -9,13 +9,13 @@ Make sure that you have completed the following steps:
 * Enable [AI Platform Training and Prediction, Container Registry, and Compute Engine APIs](https://pantheon.corp.google.com/flows/enableapi?apiid=ml.googleapis.com,compute_component,containerregistry.googleapis.com)
 * Install [Docker](https://docs.docker.com/engine/install/)
 * [Configure Docker for Cloud Container Registry](https://cloud.google.com/container-registry/docs/pushing-and-pulling)
-* [Upload the training data](https://cloud.google.com/storage/docs/uploading-objects) in the [TFRecord](https://www.tensorflow.org/tutorials/load_data/tfrecord) format to the storage bucket. You can preprocess your audio files into this format using the `ddsp_prepare_tfrecord` tool as described in [Making a TFRecord dataset from your own sounds](https://github.com/magenta/ddsp/tree/master/ddsp/training/data_preparation).
+* [Upload the training data](https://cloud.google.com/storage/docs/uploading-objects) in the [TFRecord](https://www.tensorflow.org/tutorials/load_data/tfrecord) format to the GCS bucket. You can preprocess your audio files into this format using the `ddsp_prepare_tfrecord` tool as described in [Making a TFRecord dataset from your own sounds](https://github.com/magenta/ddsp/tree/master/ddsp/training/data_preparation).
 
 ### Quickstart:
 
 #### Define some environment variables
 
-If you are located outside Europe we recommend setting `$REGION` accordingly to your location. We also recommend to [setup hostname](https://cloud.google.com/container-registry/docs/pushing-and-pulling#tag_the_local_image_with_the_registry_name) in `$IMAGE_URI` based of the `$REGION` choice as if your Docker images are stored in different region than the job is computed additional charges will be applied. 
+We recommend setting `$REGION` accordingly to your location. We also recommend to [setup hostname](https://cloud.google.com/container-registry/docs/pushing-and-pulling#tag_the_local_image_with_the_registry_name) in `$IMAGE_URI` based of the `$REGION` choice as if your Docker images are stored in different region than the job is computed additional charges will be applied. 
 
 ```bash
 export PROJECT_ID=[YOUR_PROJECT_ID]
@@ -23,8 +23,8 @@ export SAVE_DIR=gs://[YOUR_STORAGE_BUCKET_NAME]/[PATH_IN_STORAGE_BUCKET]
 export FILE_PATTERN=gs://[YOUR_STORAGE_BUCKET_NAME]/[PATH_IN_STORAGE_BUCKET]/train.tfrecord*
 export IMAGE_REPO_NAME=ddsp_train
 export IMAGE_TAG=ai_platform
-export IMAGE_URI=eu.gcr.io/$PROJECT_ID/$IMAGE_REPO_NAME:$IMAGE_TAG
-export REGION=europe-west4
+export IMAGE_URI=gcr.io/$PROJECT_ID/$IMAGE_REPO_NAME:$IMAGE_TAG
+export REGION=us-central1
 export JOB_NAME=ddsp_container_job_$(date +%Y%m%d_%H%M%S)
 ```
 #### Build the image and push it to Container Registry
@@ -43,9 +43,9 @@ gcloud ai-platform jobs submit training $JOB_NAME \
   -- \
   --save_dir=$SAVE_DIR \
   --file_pattern=$FILE_PATTERN \
-  --batch_size=64 \
+  --batch_size=16 \
   --learning_rate=0.0001 \
-  --num_steps=30000 \
+  --num_steps=40000 \
   --early_stop_loss_value=5.0
 ```
 ##### AI Platform flags:
@@ -82,8 +82,22 @@ You can add your own Gin config files in two ways:
 ### Note on cluster configuration and hyperparameters
 
 There are two cluster configurations prepared:
-* `config_single_vm.yaml` - 1 VM configuration with 2 NVIDIA Tesla T4 GPUs. Training with this configuration and recommended parameters (*batch_size: 64, learning_rate:0.0001, num_steps:30000, early_stop_loss_value:5.0*) takes around 9 hours and consumes around 44 [ML units](https://cloud.google.com/ai-platform/training/pricing#ml-units).
+* `config_single_vm.yaml` - 1 VM configuration with 1 NVIDIA Tesla T4 GPUs. Training with this configuration and recommended parameters (*batch_size: 16, learning_rate:0.0001, num_steps:40000, early_stop_loss_value:5.0*) takes around 10 hours and consumes around 19 [ML units](https://cloud.google.com/ai-platform/training/pricing#ml-units).
 
-* `config_multiple_vms.yaml` - 4 VM configuration with 8 NVIDIA Tesla T4 GPUs. Training with this configuration and recommended parameters (*batch_size: 128, learning_rate:0.001, num_steps:15000, early_stop_loss_value:5.0*) takes around 5 hours and consumes around 23 [ML units](https://cloud.google.com/ai-platform/training/pricing#ml-units).
+* `config_multiple_vms.yaml` - 4 VM configuration with 8 NVIDIA Tesla T4 GPUs. Training with this configuration and recommended parameters (*batch_size: 128, learning_rate:0.001, num_steps:15000, early_stop_loss_value:5.0*) takes around 5 hours and consumes around 44 [ML units](https://cloud.google.com/ai-platform/training/pricing#ml-units).
 
 Feel free to experiment and define your [cluster configurations](https://cloud.google.com/ai-platform/training/docs/using-gpus).
+
+### Note on dataset location
+
+Instead of uploading the preprocessed dataset into the GCS bucket, you can copy it inside the Docker container. To do so you need to place the folder with files in the same folder as Dockerfile and rebuild the image with the following code snippet added into Dockerfile:
+
+```docker
+COPY [FOLDER_WITH_DATA] /root/data
+```
+Then you should set the file pattern variable as follows:
+
+```bash
+export FILE_PATTERN=/root/data/train.tfrecord*
+```
+and complete the remaining steps as described above.
