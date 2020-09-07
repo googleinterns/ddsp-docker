@@ -34,5 +34,16 @@
       }
     }
   })();
-  
-  
+
+//- Using an anonymous function:
+function getInput() {
+    var parameters = new Object();
+    parameters.batch_size = document.getElementById("batch_size").value;
+    parameters.learning_rate = document.getElementById("lr").value;
+    parameters.num_steps = document.getElementById("num_steps").value;
+    parameters.steps_per_save = document.getElementById("steps_per_save").value;
+    parameters.steps_per_summary = document.getElementById("steps_per_summary").value;
+    parameters.early_stop_loss_value = document.getElementById("early_stop").value;
+    var jsonString= JSON.stringify(parameters);
+    window.alert(jsonString); 
+};
