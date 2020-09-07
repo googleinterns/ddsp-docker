@@ -11,7 +11,9 @@
   <link rel="stylesheet" href="./css/main.css">
   <link href="https://fonts.googleapis.com/css?family=Google+Sans:+400,500,700" media="all" rel="stylesheet">
 </head>
-
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.8.2/jquery.min.js"></script>
+<script src="https://apis.google.com/js/client.js"></script>
+<script type="text/javascript" src="./js/vm_setup.js"></script>
   <body>
     <div class="scrim" onclick="document.body.classList.toggle('drawer-opened', false)"></div>
 <header>
@@ -25,7 +27,7 @@
 </header>
 
     <div class="main">
-      <section class="white">
+      <section class="white">    <script type="text/javascript" src="./js/vm_setup.js"></script>
   <div class="content single">
     <h1>DDSP Docker</h1>
     <h2>Train autoencoder on Google Cloud AI Platform</h2>
@@ -34,10 +36,22 @@
 
         <div class="main">
       <section class="about">
+        <div class="content single">
+    <label for="project_id">Project ID: </label>
+          <input type="string" class="form-control" id="project_id"
+                 style="width: 75px;"> <br>
+    <label for="client_id">Client ID: </label>
+          <input type="string" class="form-control" id="client_id"
+                 style="width: 75px;"> <br>
+    <label for="api_key">API key: </label>
+          <input type="string" class="form-control" id="api_key"
+                 style="width: 75px;"> <br>
+          <button onclick="setupVM()"></button>
+        </div>
   <div class="content double">
     <div>
       <h3>Data preprocessing</h3>
-      <form action="/action_page.php">
+      <form action="">
         <input type="file" id="file" class="inputfile"/>
         <label for="file" class="action gray">
            Choose files to preprocess
@@ -55,6 +69,7 @@
   <div [hidden]="submitted">
     <h1>Training parameters</h1>
     <script type="text/javascript" src="./js/main.js"></script>
+
     <form name="training_parameters">
       <div class="form-group">
         <label for="batch_size">Batch Size</label>
