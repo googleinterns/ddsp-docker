@@ -9,20 +9,18 @@
     <title>DDSP Docker</title>
     <meta name="description" content="Interface for training autoencoder on GCP">
 
-    <link rel="stylesheet" href="./css/main.css">
+    <link rel="stylesheet" href="./web_interface/css/main.css">
     <link href="https://fonts.googleapis.com/css?family=Google+Sans:+400,500,700" media="all" rel="stylesheet">
 </head>
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.8.2/jquery.min.js"></script>
 <script src="https://apis.google.com/js/client.js"></script>
-<script type="text/javascript" src="./js/vm_setup.js"></script>
-
 <body>
     <div class="scrim" onclick="document.body.classList.toggle('drawer-opened', false)"></div>
     <header>
         <div class="top-bar background">
             <div class="top-bar-content">
                 <div class="logo">
-                    <img src="./assets/magenta-logo.png" height="70" alt="magenta logo">
+                    <img src="./web_interface/assets/magenta-logo.png" height="70" alt="magenta logo">
                 </div>
             </div>
         </div>
@@ -30,7 +28,6 @@
 
     <div class="main">
         <section class="white">
-            <script type="text/javascript" src="./js/vm_setup.js"></script>
             <div class="content single">
                 <div>
                     <h1>DDSP Docker</h1>
@@ -41,6 +38,8 @@
             <div class="content single">
                 <div>
                     <h3>Log in and set up VM</h3>
+                    <script type="text/javascript" src="./web_interface/js/main.js"></script>
+                    <script type="text/javascript" src="./web_interface/js/vm_setup.js"></script>
                     <div class="form-group">
                         <div class="form-field">
                             <label for="project_id">Project ID </label>
