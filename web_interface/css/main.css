@@ -1149,4 +1149,5 @@ table:not(.no-borders) tr:nth-child(odd) {
 .form-field {
     display: flex;
     justify-content: space-between;
+    margin: 5px
 }

@@ -82,13 +82,16 @@ function insertInstance() {
             'items': [
                 {
                     'key': 'startup-script',
-                    'value': '#! /bin/bash\n' +
-                        'apt update\n' +
-                        'apt -y install unzip\n' +
-                        'wget https://github.com//werkaaa/magenta_gce_vm/archive/master.zip\n' +
-                        'unzip master.zip\n' +
-                        'cd magenta_gce_vm-master\n' +
-                        'source setup.sh'
+                    'value': '#! /bin/bash\n\
+                        curl -sSO https://dl.google.com/cloudagents/install-logging-agent.sh\n\
+                        sudo bash install-logging-agent.sh\n\
+                        apt update\n\
+                        apt -y install unzip\n\
+                        wget https://github.com///googleinterns/ddsp-docker/archive/web-interface.zip\n\
+                        unzip web-interface.zip\n\
+                        mv ddsp-docker-web-interface /opt/app\n\
+                        cd /opt/app\n\
+                        source setup.sh'
                 }
             ],
         },
@@ -99,6 +102,11 @@ function insertInstance() {
                 ]
             }
         ],
+        'tags': {
+            'items': [
+              'http-server'
+            ]
+          }
     };
     var request = gapi.client.compute.instances.insert({
         'project': DEFAULT_PROJECT,
