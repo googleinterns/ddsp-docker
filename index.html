@@ -14,6 +14,7 @@
 </head>
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.8.2/jquery.min.js"></script>
 <script src="https://apis.google.com/js/client.js"></script>
+
 <body>
     <div class="scrim" onclick="document.body.classList.toggle('drawer-opened', false)"></div>
     <header>
@@ -36,10 +37,10 @@
         </section>
         <section class="about">
             <div class="content single">
-                <div>
-                    <h3>Log in and set up VM</h3>
+                <div id="login" style="display: block;">
                     <script type="text/javascript" src="./web_interface/js/main.js"></script>
                     <script type="text/javascript" src="./web_interface/js/vm_setup.js"></script>
+                    <h3>Log in and set up VM</h3>
                     <div class="form-group">
                         <div class="form-field">
                             <label for="project_id">Project ID </label>
@@ -55,12 +56,23 @@
                         </div>
                     </div>
                     <input type="button" onclick="logIn()" id="log_in" class="inputfile" />
-                    <label for="log_in" class="action gray">
+                    <label for="log_in" class="action gray" style="width: 100%;">
                         Log in
                     </label>
+                </div>
+                <div id="vm_control" style="display: none;">
+                    <h3>You have successfully logged in!</h3>
                     <input type="button" onclick="setUpVM()" id="set_up_vm" class="inputfile" />
-                    <label for="set_up_vm" class="action gray">
+                    <label for="set_up_vm" class="action gray" style="width: 32%;">
                         Set up VM
+                    </label>
+                    <input type="button" onclick="getInstance()" id="go_to_vm" class="inputfile" />
+                    <label for="go_to_vm" class="action gray" style="width: 32%;">
+                        Go to VM
+                    </label>
+                    <input type="button" onclick="cleanUp()" id="clean_up" class="inputfile" />
+                    <label for="clean_up" class="action gray" style="width: 32%;">
+                        Clean up
                     </label>
                 </div>
             </div>

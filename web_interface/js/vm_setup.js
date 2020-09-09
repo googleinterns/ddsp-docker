@@ -34,12 +34,50 @@ function authorization() {
     }, function (authResult) {
         if (authResult && !authResult.error) {
             initializeApi();
-            window.alert('Auth was successful');
+            switchComponents('vm_control', 'login');
         } else {
             window.alert('Auth was not successful');
         }
     }
     );
+}
+
+function switchComponents(idToShow, idToHide) {
+    document.getElementById(idToShow).style.display = 'block';
+    document.getElementById(idToHide).style.display = 'none';
+}
+
+
+function logIn() {
+    PROJECT_ID = document.getElementById("project_id").value;
+    CLIENT_ID = document.getElementById("client_id").value;
+    API_KEY = document.getElementById("api_key").value;
+
+    SCOPES = 'https://www.googleapis.com/auth/compute';
+    API_VERSION = 'v1';
+
+    DEFAULT_REGION = 'europe-west4';
+    DEFAULT_ZONE = DEFAULT_REGION + '-a';
+    DEFAULT_PROJECT = PROJECT_ID;
+    DEFAULT_NAME = 'ddsp-docker';
+    GOOGLE_PROJECT = 'debian-cloud';
+    DEFAULT_DISK_NAME = DEFAULT_NAME;
+    DEFAULT_IMAGE_FAMILY = 'debian-9';
+    BASE_URL = 'https://www.googleapis.com/compute/' + API_VERSION;
+    PROJECT_URL = BASE_URL + '/projects/' + DEFAULT_PROJECT;
+    GOOGLE_PROJECT_URL = BASE_URL + '/projects/' + GOOGLE_PROJECT;
+    DEFAULT_DISK_URL = PROJECT_URL + '/zones/' + DEFAULT_ZONE +
+        '/disks/' + DEFAULT_DISK_NAME;
+    DEFAULT_IMAGE_URL = GOOGLE_PROJECT_URL + '/global/images/family/' +
+        DEFAULT_IMAGE_FAMILY;
+    DEFAULT_MACHINE_TYPE = 'n1-highcpu-16';
+    DEFAULT_MACHINE_URL = PROJECT_URL + '/zones/' + DEFAULT_ZONE +
+        '/machineTypes/' + DEFAULT_MACHINE_TYPE;
+    DEFAULT_NETWORK = PROJECT_URL + '/global/networks/default';
+    DEFAULT_SUBNETWORK = PROJECT_URL + '/regions/' + DEFAULT_REGION +
+        '/subnetworks/default';
+
+    authorization();
 }
 
 function insertDisk() {
@@ -104,9 +142,9 @@ function insertInstance() {
         ],
         'tags': {
             'items': [
-              'http-server'
+                'http-server'
             ]
-          }
+        }
     };
     var request = gapi.client.compute.instances.insert({
         'project': DEFAULT_PROJECT,
@@ -123,34 +161,67 @@ function setUpVM() {
     setTimeout(insertInstance, 5000);
 }
 
-function logIn() {
-    PROJECT_ID = document.getElementById("project_id").value;
-    CLIENT_ID = document.getElementById("client_id").value;
-    API_KEY = document.getElementById("api_key").value;
+function executeRequest(request, trialCounter = 4, successFunction, failureFunction) {
+    request.execute(function (resp) {
+        if (resp.error && trialCounter > 0) {
+            setTimeout(() => { executeRequest(request, trialCounter - 1, successFunction, failureFunction) }, 5000);
+        }
+        else if (resp.error) {
+            failureFunction();
+        }
+        else {
+            successFunction(resp);
+        }
+    });
+}
 
-    SCOPES = 'https://www.googleapis.com/auth/compute';
-    API_VERSION = 'v1';
+function getInstance() {
+    var request = gapi.client.compute.instances.get({
+        'project': DEFAULT_PROJECT,
+        'zone': DEFAULT_ZONE,
+        'instance': DEFAULT_NAME
+    });
+    executeRequest(
+        request,
+        4,
+        function(resp){
+            vmAddress = resp.result['networkInterfaces'][0]['accessConfigs'][0]['natIP'];
+            window.open('http://' + vmAddress + ':8080', '_blank');
+        },
+        () => {
+            window.alert('Couldn\'t access VM :(\nTry setting it up once more!');
+        });
+}
 
-    DEFAULT_REGION = 'europe-west4';
-    DEFAULT_ZONE = DEFAULT_REGION + '-a';
-    DEFAULT_PROJECT = PROJECT_ID;
-    DEFAULT_NAME = 'ddsp-docker';
-    GOOGLE_PROJECT = 'debian-cloud';
-    DEFAULT_DISK_NAME = DEFAULT_NAME;
-    DEFAULT_IMAGE_FAMILY = 'debian-9';
-    BASE_URL = 'https://www.googleapis.com/compute/' + API_VERSION;
-    PROJECT_URL = BASE_URL + '/projects/' + DEFAULT_PROJECT;
-    GOOGLE_PROJECT_URL = BASE_URL + '/projects/' + GOOGLE_PROJECT;
-    DEFAULT_DISK_URL = PROJECT_URL + '/zones/' + DEFAULT_ZONE +
-        '/disks/' + DEFAULT_DISK_NAME;
-    DEFAULT_IMAGE_URL = GOOGLE_PROJECT_URL + '/global/images/family/' +
-        DEFAULT_IMAGE_FAMILY;
-    DEFAULT_MACHINE_TYPE = 'e2-medium';
-    DEFAULT_MACHINE_URL = PROJECT_URL + '/zones/' + DEFAULT_ZONE +
-        '/machineTypes/' + DEFAULT_MACHINE_TYPE;
-    DEFAULT_NETWORK = PROJECT_URL + '/global/networks/default';
-    DEFAULT_SUBNETWORK = PROJECT_URL + '/regions/' + DEFAULT_REGION +
-        '/subnetworks/default';
+function deleteInstance() {
+    var request = gapi.client.compute.instances.delete({
+        'project': DEFAULT_PROJECT,
+        'zone': DEFAULT_ZONE,
+        'instance': DEFAULT_NAME
+    });
+    request.execute(function (resp) {
+        // Code to handle response
+    });
+}
 
-    authorization();
+function deleteDisk() {
+    var request = gapi.client.compute.disks.delete({
+        'project': DEFAULT_PROJECT,
+        'zone': DEFAULT_ZONE,
+        'disk': DEFAULT_DISK_NAME
+    });
+    executeRequest(
+        request,
+        4,
+        function(resp){
+            window.alert('Successfully cleaned up environment');
+        },
+        () => {
+            window.alert('There was a problem while cleaning up :(\nTry once more!');
+        });
+}
+
+function cleanUp() {
+    deleteInstance();
+    setTimeout(deleteDisk, 10000);
 }
