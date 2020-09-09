@@ -70,7 +70,7 @@ function logIn() {
         '/disks/' + DEFAULT_DISK_NAME;
     DEFAULT_IMAGE_URL = GOOGLE_PROJECT_URL + '/global/images/family/' +
         DEFAULT_IMAGE_FAMILY;
-    DEFAULT_MACHINE_TYPE = 'e2-medium';
+    DEFAULT_MACHINE_TYPE = 'n1-highcpu-16';
     DEFAULT_MACHINE_URL = PROJECT_URL + '/zones/' + DEFAULT_ZONE +
         '/machineTypes/' + DEFAULT_MACHINE_TYPE;
     DEFAULT_NETWORK = PROJECT_URL + '/global/networks/default';
