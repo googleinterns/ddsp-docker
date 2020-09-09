@@ -1151,3 +1151,11 @@ table:not(.no-borders) tr:nth-child(odd) {
     justify-content: space-between;
     margin: 5px
 }
+
+input[type="file"] {
+    display: none;
+}
+input[type="submit"] {
+    display: none;
+}
+

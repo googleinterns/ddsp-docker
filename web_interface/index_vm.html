@@ -33,7 +33,7 @@
       <script type="text/javascript" src="./js/vm_setup.js"></script>
       <div class="content single">
         <div>
-          <h1>DDSP Docker</h1>
+          <h1>DDSP Dockerrr</h1>
           <h2>Train autoencoder on Google Cloud AI Platform</h2>
         </div>
     </section>
@@ -41,18 +41,18 @@
       <div class="content double">
         <div>
           <h3>Data preprocessing</h3>
-          <form action="">
-            <input type="file" id="file" class="inputfile" />
-            <label for="file" class="action gray">
-              Choose files to preprocess
-            </label>
-            <input type="button" id="button" class="inputfile" />
-            <label for="button" class="action gray">
-              Preprocess
-            </label>
-          </form>
-        </div>
-        <div>
+           <form action = "/" method = "POST" enctype = "multipart/form-data">
+               <label for="choose_files" class="action gray">
+                   <input id = "choose_files" type = "file" name = "file" multiple = "multiple"/>
+                        Choose files to preprocess 
+                </label>
+                <label class="action gray">
+                  <input type = "submit" class="action gray"/>
+                        Preprocess 
+                </label>
+           </form>  
+          </div>
+          <div>
           <h3>Training job submission</h3>
           <p>
           <div class="container">
@@ -86,7 +86,10 @@
                   <input type="number" class="form-control" id="early_stop" style="width: 75px;" value="5"
                     step="0.1"><br>
                 </div><br>
-                <input type="button" value="Submit" onclick="getInput()">
+                 <input type="button" onclick="getInput()" id="submit" class="inputfile" />
+                    <label for="submit" class="action gray">
+                        Submit
+                    </label>
               </form>
             </div>
 
