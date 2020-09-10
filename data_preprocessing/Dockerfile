@@ -1,6 +1,6 @@
 # Uses one of AI Platform base images.
 # You can try using different images however only this one has been tested.
-FROM gcr.io/deeplearning-platform-release/tf2-gpu.2-2
+FROM gcr.io/deeplearning-platform-release/tf2-cpu.2-2
 WORKDIR /root
 
 # Installs sndfile library for reading and writing audio files.
@@ -17,3 +17,4 @@ RUN cd ddsp-master && python setup.py install
 
 # These parameters can be also specified as part of the job submission arguments.
 ENTRYPOINT ["ddsp_prepare_tfrecord", "--num_shards=10", "--alsologtostderr"]
+# CMD echo hello >> /root/blabla.txt
