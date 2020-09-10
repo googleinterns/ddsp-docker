@@ -7,7 +7,7 @@ def create_bucket():
     bucket_name = "ddsp-training-web"
     storage_client = storage.Client()   
     try:
-        bucket = storage_client.get_bucket(bucket_name)
+        bucket = storage_client.bucket(bucket_name)
         print("Bucket {} exists".format(bucket.name))
     except:
         bucket = storage_client.create_bucket(bucket_name)
