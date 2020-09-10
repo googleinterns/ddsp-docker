@@ -41,15 +41,17 @@
       <div class="content double">
         <div>
           <h3>Data preprocessing</h3>
-          <form action="">
+          <form>
             <input type="file" id="file" class="inputfile" />
             <label for="file" class="action gray">
               Choose files to preprocess
             </label>
-            <input type="button" id="button" class="inputfile" />
-            <label for="button" class="action gray">
-              Preprocess
-            </label>
+            <form action="/preprocess/" method="post">
+              <button id="preprocess_button" class="inputfile" type="submit"></button>
+              <label for="preprocess_button" class="action gray">
+                Preprocess
+              </label>
+            </form>
           </form>
         </div>
         <div>
