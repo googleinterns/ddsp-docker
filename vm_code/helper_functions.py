@@ -2,20 +2,13 @@ import os
 from google.cloud import storage
 from os import listdir
 
-def create_bucket():
-    """Creates a new bucket.""" 
-    try:
-        os.system("sudo gsutil mb gs://ddsp-train-web")
-    except:
-        print("Bucket ddsp-train-web exists")
-    else:
-        print("Bucket ddsp-train-web created")
+def create_bucket(bucket_name):
+    """Creates a new bucket."""
+    create_command = "gsutil mb " + bucket_name
+    os.system(create_command)
 
-
-def upload_blob(uploads_dir):
+def upload_blob(bucket_name, uploads_dir):
     """Uploads files to the bucket."""
-    upload_command = "sudo gsutil -m cp -r " + uploads_dir + " gs://ddsp-train-web" 
+    upload_command = "gsutil -m cp -r " + uploads_dir + " " + bucket_name
     os.system(upload_command)
-
-    print("Files uploaded to gs://ddsp-train-web.")
         

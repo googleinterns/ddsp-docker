@@ -1,4 +1,6 @@
 import os
+import time
+import calendar
 import helper_functions
 from werkzeug.utils import secure_filename
 from flask import Flask, send_from_directory, request, redirect, url_for, abort
@@ -27,8 +29,9 @@ def upload_files():
             if file_ext not in app.config['UPLOAD_EXTENSIONS']:
                 abort(400)
             uploaded_file.save(os.path.join(uploads_dir, filename))
-    helper_functions.create_bucket()
-    helper_functions.upload_blob(uploads_dir)
+    bucket_name = "gs://ddsp-train-" + str(calendar.timegm(time.gmtime()))
+    helper_functions.create_bucket(bucket_name)
+    helper_functions.upload_blob(bucket_name, uploads_dir)
     return redirect(url_for('main'))
 
 if __name__ == '__main__':
