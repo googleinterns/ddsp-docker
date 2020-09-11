@@ -24,7 +24,7 @@ os.makedirs(uploads_dir, exist_ok=True)
 def main():
     return send_from_directory(app.static_folder, 'index_vm.html')
 
-@app.route('/', methods=['POST'])
+@app.route('/upload', methods=['POST'])
 def upload_files():
     for uploaded_file in request.files.getlist('file'):
         filename = secure_filename(uploaded_file.filename)
@@ -33,12 +33,8 @@ def upload_files():
             if file_ext not in app.config['UPLOAD_EXTENSIONS']:
                 abort(400)
             uploaded_file.save(os.path.join(uploads_dir, filename))
-    #helper_functions.create_bucket(BUCKET_NAME)
-    #helper_functions.upload_blob(BUCKET_NAME, uploads_dir)
-    create_command = "gsutil mb " + app.config['BUCKET_NAME']
-    os.system(create_command)
-    upload_command = "gsutil -m cp -r " + uploads_dir + " " + app.config['BUCKET_NAME'] + "/audio"
-    os.system(upload_command)
+    helper_functions.create_bucket(app.config['BUCKET_NAME'])
+    helper_functions.upload_blob(app.config['BUCKET_NAME'], uploads_dir)
     return redirect(url_for('main'))
 
 @app.route('/preprocess', methods=['POST'])

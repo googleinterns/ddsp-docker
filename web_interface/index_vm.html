@@ -41,16 +41,22 @@
       <div class="content double">
         <div>
           <h3>Data preprocessing</h3>
-           <form action = "/" method = "POST" enctype = "multipart/form-data">
-               <label for="choose_files" class="action gray">
+           <form action = "/upload" method = "POST" enctype = "multipart/form-data">
+               <label for="choose_files" class="action gray" style='width:70%;'>
                    <input id = "choose_files" type = "file" name = "file" multiple = "multiple"/>
                         Choose files to preprocess 
                 </label>
-                <label class="action gray">
+                <label class="action gray" style='width:28.5%;'>
                   <input type = "submit" class="action gray"/>
-                        Preprocess 
+                        Upload 
                 </label>
-           </form>  
+           </form>
+           <form action = "/preprocess" method = "POST" enctype = "multipart/form-data">
+             <label class="action gray" style='width:100%;'>
+               <input type = "submit" class="action gray"/>
+                     Preprocess 
+             </label>
+        </form>  
           </div>
           <div>
           <h3>Training job submission</h3>
