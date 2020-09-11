@@ -23,7 +23,7 @@ os.makedirs(uploads_dir, exist_ok=True)
 def main():
     return send_from_directory(app.static_folder, 'index_vm.html')
 
-@app.route('/', methods=['POST'])
+@app.route('/upload', methods=['POST'])
 def upload_files():
     for uploaded_file in request.files.getlist('file'):
         filename = secure_filename(uploaded_file.filename)
@@ -31,7 +31,7 @@ def upload_files():
             file_ext = os.path.splitext(filename)[1]
             if file_ext not in app.config['UPLOAD_EXTENSIONS']:
                 abort(400)
-            uploaded_file.save(os.path.join(uploads_dir, filename))
+            uploaded_file.save(os.path.join(uploads_dir, filename))D
     helper_functions.create_bucket(app.config['BUCKET_NAME']))
     helper_functions.upload_blob(app.config['BUCKET_NAME'], uploads_dir)
     return redirect(url_for('main'))
