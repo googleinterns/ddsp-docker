@@ -19,7 +19,6 @@ app.config['BUCKET_NAME'] = "gs://ddsp-train-" + str(int((datetime.datetime.now(
 uploads_dir = os.path.join(app.instance_path, app.config['UPLOAD_PATH'])
 os.makedirs(uploads_dir, exist_ok=True)
 
-
 @app.route('/')
 def main():
     return send_from_directory(app.static_folder, 'index_vm.html')
