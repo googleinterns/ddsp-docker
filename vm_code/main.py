@@ -1,13 +1,13 @@
 import os
 import time
 import calendar
-import helper_functions
 from werkzeug.utils import secure_filename
 from flask import Flask, send_from_directory, request, redirect, url_for, abort
+import helper_functions
 
 app = Flask(
     __name__,
-    static_url_path='', 
+    static_url_path='',
     static_folder='../web_interface')
 app.config['UPLOAD_EXTENSIONS'] = ['.wav', '.mp3']
 app.config['UPLOAD_PATH'] = 'uploads'
@@ -15,6 +15,8 @@ app.config['UPLOAD_PATH'] = 'uploads'
 # Create a directory in a known location to save files to.
 uploads_dir = os.path.join(app.instance_path, app.config['UPLOAD_PATH'])
 os.makedirs(uploads_dir, exist_ok=True)
+
+BUCKET_NAME = "gs://ddsp-train-" + str(calendar.timegm(time.gmtime()))
 
 @app.route('/')
 def main():
@@ -29,9 +31,8 @@ def upload_files():
             if file_ext not in app.config['UPLOAD_EXTENSIONS']:
                 abort(400)
             uploaded_file.save(os.path.join(uploads_dir, filename))
-    bucket_name = "gs://ddsp-train-" + str(calendar.timegm(time.gmtime()))
-    helper_functions.create_bucket(bucket_name)
-    helper_functions.upload_blob(bucket_name, uploads_dir)
+    helper_functions.create_bucket(BUCKET_NAME)
+    helper_functions.upload_blob(BUCKET_NAME, uploads_dir)
     return redirect(url_for('main'))
 
 if __name__ == '__main__':
