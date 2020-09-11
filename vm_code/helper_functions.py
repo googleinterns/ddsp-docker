@@ -1,6 +1,8 @@
 """Helper function for GCP communication."""
 import datetime
 import os
+import subprocess
+from subprocess import Popen, PIPE
 
 def create_bucket(bucket_name):
     """Creates a new bucket."""
@@ -25,3 +27,18 @@ def run_preprocessing(bucket_name, region):
         " --input_audio_filepatterns=" + os.path.join(bucket_name, 'audio/*') +
         " --output_tfrecord_path=" + os.path.join(bucket_name, 'tf_record/train.tfrecord'))
     os.system(job_submission_command)
+
+def command_output_to_dict(command_output):
+    """Transforms output string into dict."""
+    command_output = command_output.replace('"', '').replace('\'', '')
+    output_dict = {x.split(': ')[0].replace(' ', ''):x.split(': ')[-1].replace(' ', '') for x in command_output.split('\\n')[:-1]}
+    return output_dict
+
+def check_job_status(job_name):
+    """Checks job status."""
+    job_status_command = 'gcloud ai-platform jobs describe ' + job_name
+    job_info_str = str(subprocess.Popen(job_status_command.split(), stdin = PIPE, stdout = PIPE, stderr = PIPE).communicate()[0])
+    if len(job_info_str) <= 3:
+        return 'JOB_NOT_EXIST'
+    else:
+        return command_output_to_dict(job_info_str)['state']
