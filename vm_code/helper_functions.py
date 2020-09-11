@@ -14,15 +14,14 @@ def upload_blob(bucket_name, uploads_dir):
 
 def run_preprocessing(bucket_name, region):
     """Runs preprocessing job on AI Platform"""
-    job_name = f"preprocessing_job_{int((datetime.datetime.now()-datetime.datetime(1970,1,1)).total_seconds())}"
+    job_name = "preprocessing_job_" + str(int((datetime.datetime.now()-datetime.datetime(1970,1,1)).total_seconds()))
     config_file = os.path.join(os.getcwd(), "../magenta_docker/config_single_vm.yaml") 
     job_submission_command = (
-        f"gcloud ai-platform jobs submit training {job_name} "
-        f" --region {region} "
-        f" --config {config_file} "
-        " --master-image-uri $PREPROCESSING_IMAGE_URI "
-        "-- "
-        f"--input_audio_filepatterns={os.path.join(bucket_name, 'audio/*')} "
-        f"--output_tfrecord_path={os.path.join(bucket_name, 'tf_record/train.tfrecord')}")
-
+        "gcloud ai-platform jobs submit training " + job_name +
+        " --region " + region +
+        " --config " + config_file +
+        " --master-image-uri $PREPROCESSING_IMAGE_URI" +
+        " -- " +
+        " --input_audio_filepatterns=" + os.path.join(bucket_name, 'audio/*') +
+        " --output_tfrecord_path=" + os.path.join(bucket_name, 'tf_record/train.tfrecord'))
     os.system(job_submission_command)
