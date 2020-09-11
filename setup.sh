@@ -29,12 +29,12 @@ export PREPROCESSING_IMAGE_URI=eu.gcr.io/$PROJECT_ID/data_preprocessing:$IMAGE_T
 # docker build -f data_preprocessing/Dockerfile -t $PREPROCESSING_IMAGE_URI ./data_preprocessing
 # docker push $PREPROCESSING_IMAGE_URI
 
-apt-get upgrade
-apt-get install -yq supervisor python3 python-pip
+#apt-get install -yq supervisor python3 python-pip
+apt-get install -yq python3 python-pip
 pip install --upgrade pip virtualenv
-useradd -m -d /home/pythonapp pythonapp
-usermod -aG sudo pythonapp
-export HOME=/root
+# useradd -m -d /home/pythonapp pythonapp
+# usermod -aG sudo pythonapp
+# export HOME=/root
 mv ddsp_docker-web_interface /opt/app
 virtualenv -p python3 /opt/app/vm_code/env
 source /opt/app/vm_code/env/bin/activate
@@ -51,6 +51,8 @@ gcloud compute firewall-rules create default-allow-http-8080 \
 
 # supervisorctl reread
 # supervisorctl update
+
+# source docker_setup.sh &
 
 cd /opt/app/vm_code
 /opt/app/vm_code/env/bin/gunicorn -b 0.0.0.0:8080 main:app --timeout 300
