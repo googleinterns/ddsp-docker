@@ -31,14 +31,20 @@ def upload_files():
             file_ext = os.path.splitext(filename)[1]
             if file_ext not in app.config['UPLOAD_EXTENSIONS']:
                 abort(400)
-            uploaded_file.save(os.path.join(uploads_dir, filename))D
-    helper_functions.create_bucket(app.config['BUCKET_NAME']))
+            uploaded_file.save(os.path.join(uploads_dir, filename))
+    helper_functions.create_bucket(app.config['BUCKET_NAME'])
     helper_functions.upload_blob(app.config['BUCKET_NAME'], uploads_dir)
     return redirect(url_for('main'))
 
 @app.route('/preprocess', methods=['POST'])
 def preprocess():
     helper_functions.run_preprocessing(app.config['BUCKET_NAME'], app.config['REGION'])
+    return redirect(url_for('main'))
+
+@app.route('/submit', methods=["POST"])
+def job_submission():
+    print(request.form)
+    helper_functions.submit_job(request, app.config['BUCKET_NAME'], app.config['REGION'])
     return redirect(url_for('main'))
 
 if __name__ == '__main__':
