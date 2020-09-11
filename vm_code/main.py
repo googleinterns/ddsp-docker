@@ -31,8 +31,12 @@ def upload_files():
             if file_ext not in app.config['UPLOAD_EXTENSIONS']:
                 abort(400)
             uploaded_file.save(os.path.join(uploads_dir, filename))
-    helper_functions.create_bucket(BUCKET_NAME)
-    helper_functions.upload_blob(BUCKET_NAME, uploads_dir)
+    #helper_functions.create_bucket(BUCKET_NAME)
+    #helper_functions.upload_blob(BUCKET_NAME, uploads_dir)
+    create_command = "gsutil mb " + BUCKET_NAME
+    os.system(create_command)
+    upload_command = "gsutil -m cp -r " + uploads_dir + " " + BUCKET_NAME + "/audio"
+    os.system(upload_command)
     return redirect(url_for('main'))
 
 if __name__ == '__main__':
