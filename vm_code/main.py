@@ -1,19 +1,24 @@
+"""Main app script."""
+import datetime
 import os
+
+from flask import Flask, send_from_directory, request, redirect, url_for, abort
 import helper_functions
 from werkzeug.utils import secure_filename
-from flask import Flask, send_from_directory, request, redirect, url_for, abort
 
 app = Flask(
     __name__,
-    static_url_path='', 
+    static_url_path='',
     static_folder='../web_interface')
 app.config['UPLOAD_EXTENSIONS'] = ['.wav', '.mp3']
 app.config['UPLOAD_PATH'] = 'uploads'
 app.config['REGION'] = 'europe-west4'
+app.config['BUCKET_NAME'] = "gs://ddsp-train-" + str(int((datetime.datetime.now()-datetime.datetime(1970,1,1)).total_seconds()))
 
 # Create a directory in a known location to save files to.
 uploads_dir = os.path.join(app.instance_path, app.config['UPLOAD_PATH'])
 os.makedirs(uploads_dir, exist_ok=True)
+
 
 @app.route('/')
 def main():
@@ -28,11 +33,16 @@ def upload_files():
             if file_ext not in app.config['UPLOAD_EXTENSIONS']:
                 abort(400)
             uploaded_file.save(os.path.join(uploads_dir, filename))
-    helper_functions.create_bucket()
-    helper_functions.upload_blob(uploads_dir)
+    #helper_functions.create_bucket(BUCKET_NAME)
+    #helper_functions.upload_blob(BUCKET_NAME, uploads_dir)
+    create_command = "gsutil mb " + app.config['BUCKET_NAME']
+    os.system(create_command)
+    upload_command = "gsutil -m cp -r " + uploads_dir + " " + app.config['BUCKET_NAME'] + "/audio"
+    os.system(upload_command)
     return redirect(url_for('main'))
 
 @app.route('/preprocess', methods=['POST'])
+def preprocess():
     helper_functions.run_preprocessing(app.config['BUCKET_NAME'], app.config['REGION'])
     return redirect(url_for('main'))
 
