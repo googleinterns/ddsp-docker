@@ -31,8 +31,8 @@ def upload_files():
             file_ext = os.path.splitext(filename)[1]
             if file_ext not in app.config['UPLOAD_EXTENSIONS']:
                 abort(400)
-            uploaded_file.save(os.path.join(uploads_dir, filename))D
-    helper_functions.create_bucket(app.config['BUCKET_NAME']))
+            uploaded_file.save(os.path.join(uploads_dir, filename))
+    helper_functions.create_bucket(app.config['BUCKET_NAME'])
     helper_functions.upload_blob(app.config['BUCKET_NAME'], uploads_dir)
     return redirect(url_for('main'))
 
