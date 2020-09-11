@@ -1,6 +1,4 @@
 import os
-from google.cloud import storage
-from os import listdir
 
 def create_bucket(bucket_name):
     """Creates a new bucket."""
@@ -9,6 +7,6 @@ def create_bucket(bucket_name):
 
 def upload_blob(bucket_name, uploads_dir):
     """Uploads files to the bucket."""
-    upload_command = "gsutil -m cp -r " + uploads_dir + " " + bucket_name
+    upload_command = "gsutil -m cp -r " + uploads_dir + " " + bucket_name + "/audio"
     os.system(upload_command)
-        
+    
