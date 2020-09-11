@@ -32,7 +32,7 @@ def upload_files():
             if file_ext not in app.config['UPLOAD_EXTENSIONS']:
                 abort(400)
             uploaded_file.save(os.path.join(uploads_dir, filename))
-    helper_functions.create_bucket(app.config['BUCKET_NAME'])
+    helper_functions.create_bucket(app.config['BUCKET_NAME'], app.config['REGION'])
     helper_functions.upload_blob(app.config['BUCKET_NAME'], uploads_dir)
     return redirect(url_for('main'))
 
@@ -49,4 +49,3 @@ def job_submission():
 
 if __name__ == '__main__':
     app.run(host='127.0.0.1', port=8080, debug=True)
-    

@@ -4,9 +4,9 @@ import os
 import subprocess
 from subprocess import Popen, PIPE
 
-def create_bucket(bucket_name):
+def create_bucket(bucket_name, region):
     """Creates a new bucket."""
-    create_command = "gsutil mb " + bucket_name
+    create_command = "gsutil mb -l" + region + " " + bucket_name
     os.system(create_command)
 
 def upload_blob(bucket_name, uploads_dir):
