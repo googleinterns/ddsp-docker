@@ -9,6 +9,7 @@ app = Flask(
     static_folder='../web_interface')
 app.config['UPLOAD_EXTENSIONS'] = ['.wav', '.mp3']
 app.config['UPLOAD_PATH'] = 'uploads'
+app.config['REGION'] = 'europe-west4'
 
 # Create a directory in a known location to save files to.
 uploads_dir = os.path.join(app.instance_path, app.config['UPLOAD_PATH'])
@@ -29,6 +30,10 @@ def upload_files():
             uploaded_file.save(os.path.join(uploads_dir, filename))
     helper_functions.create_bucket()
     helper_functions.upload_blob(uploads_dir)
+    return redirect(url_for('main'))
+
+@app.route('/preprocess', methods=['POST'])
+    helper_functions.run_preprocessing(app.config['BUCKET_NAME'], app.config['REGION'])
     return redirect(url_for('main'))
 
 if __name__ == '__main__':
