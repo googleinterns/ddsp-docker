@@ -1,8 +1,7 @@
 #! /bin/bash
 export PROJECT_ID=$(gcloud config list project --format "value(core.project)")
-export IMAGE_REPO_NAME=ddsp_train
 export IMAGE_TAG=gce_vm
-export IMAGE_URI=eu.gcr.io/$PROJECT_ID/$IMAGE_REPO_NAME:$IMAGE_TAG
+export IMAGE_URI=eu.gcr.io/$PROJECT_ID/ddsp_train:$IMAGE_TAG
 export PREPROCESSING_IMAGE_URI=eu.gcr.io/$PROJECT_ID/data_preprocessing:$IMAGE_TAG
 
 apt-get install -yq python3 python-pip

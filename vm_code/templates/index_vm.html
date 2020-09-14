@@ -41,66 +41,81 @@
       <div class="content double">
         <div>
           <h3>Data preprocessing</h3>
-           <form action = "/upload" method = "POST" enctype = "multipart/form-data">
-               <label for="choose_files" class="action gray" style='width:70%;'>
-                   <input id = "choose_files" type = "file" name = "file" multiple = "multiple"/>
-                        Choose files to preprocess 
-                </label>
-                <label class="action gray" style='width:28.5%;'>
-                  <input type = "submit" class="action gray"/>
-                        Upload 
-                </label>
-           </form>
-           <form action = "/preprocess" method = "POST" enctype = "multipart/form-data">
-             <label class="action gray" style='width:100%;'>
-               <input type = "submit" class="action gray"/>
-                     Preprocess 
-             </label>
-        </form>  
+          <form action="/upload" method="POST" enctype="multipart/form-data">
+            <label for="choose_files" class="action gray" style='width:70%;'>
+              <input id="choose_files" type="file" name="file" multiple="multiple" />
+              Choose files to preprocess
+            </label>
+            <label class="action gray" style='width:28.5%;'>
+              <input type="submit" class="action gray" />
+              Upload
+            </label>
+          </form>
+          <form action="/preprocess" method="POST" enctype="multipart/form-data">
+            <label class="action gray" style='width:100%;'>
+              <input type="submit" class="action gray" />
+              Preprocess
+            </label>
+          </form>
+          <div style="margin: 10px;">
+            {{preprocessing_message}}
           </div>
-          <div>
-            <h3>Training job submission</h3>
-              <p>
-                <div class="container">
-                  <div [hidden]="submitted">
-                    <h1>Training parameters</h1>
-                    <form action="/submit" method="POST">
-                      <div class="form-group">
-                        <label>Batch Size</label>
-                        <select class="form-control" name="batch_size" id="batch_size">
-                          <option value="128">128</option>
-                          <option value="8">8</option>
-                          <option value="16">16</option>
-                          <option value="32">32</option>
-                          <option value="64">64</option>
-                        </select><br>
-                      </div>
-                      <div class="form-group">
-                        <label>Learning Rate</label>
-                        <input type="number" class="form-control" id="learning_rate" name="learning_rate" style="width: 75px;" value="0.001" step="0.0001"><br>
-                      </div>
-                      <div class="form-group">
-                        <label>Number of steps</label>
-                        <input type="number" class="form-control" id="num_steps" name="num_steps" style="width: 75px;" value="15000" step="1000"><br>
-                      </div>
-                      <div class="form-group">
-                        <label>Steps per Save</label>
-                        <input type="number" class="form-control" id="steps_per_save" name="steps_per_save" style="width: 75px;" value="300" step="100"><br>
-                      </div>
-                      <div class="form-group">
-                        <label>Steps per Summary</label>
-                        <input type="number" class="form-control" id="steps_per_summary" name="steps_per_summary" style="width: 75px;" value="300" step="100"><br>
-                      </div>
-                      <div class="form-group">
-                        <label>Early Stop Loss Value</label>
-                        <input type="number" class="form-control" id="early_stop_loss_value" name="early_stop_loss_value" style="width: 75px;" value="5" step="0.1"><br>
-                      </div>
-                    <button type="submit" class="action gray">Submit</button>
-                  </form>
+        </div>
+        <div>
+          <h3>Training job submission</h3>
+          <p>
+          <div class="container">
+            <div [hidden]="submitted">
+              <!-- <h4>Training parameters</h1> -->
+              <form action="/submit" method="POST">
+                <div class="form-group">
+                  <label>Batch Size</label>
+                  <select class="form-control" name="batch_size" id="batch_size">
+                    <option value="128">128</option>
+                    <option value="8">8</option>
+                    <option value="16">16</option>
+                    <option value="32">32</option>
+                    <option value="64">64</option>
+                  </select><br>
                 </div>
+                <div class="form-group">
+                  <label>Learning Rate</label>
+                  <input type="number" class="form-control" id="learning_rate" name="learning_rate" style="width: 75px;"
+                    value="0.001" step="0.0001"><br>
+                </div>
+                <div class="form-group">
+                  <label>Number of steps</label>
+                  <input type="number" class="form-control" id="num_steps" name="num_steps" style="width: 75px;"
+                    value="15000" step="1000"><br>
+                </div>
+                <div class="form-group">
+                  <label>Steps per Save</label>
+                  <input type="number" class="form-control" id="steps_per_save" name="steps_per_save"
+                    style="width: 75px;" value="300" step="100"><br>
+                </div>
+                <div class="form-group">
+                  <label>Steps per Summary</label>
+                  <input type="number" class="form-control" id="steps_per_summary" name="steps_per_summary"
+                    style="width: 75px;" value="300" step="100"><br>
+                </div>
+                <div class="form-group">
+                  <label>Early Stop Loss Value</label>
+                  <input type="number" class="form-control" id="early_stop_loss_value" name="early_stop_loss_value"
+                    style="width: 75px;" value="5" step="0.1"><br>
+                </div>
+                <!-- <button type="submit" class="action gray">Submit</button> -->
+                <label class="action gray" style='width:100%;'>
+                  <input type="submit" class="action gray" />
+                  Submit
+                </label>
+              </form>
+              <div style="margin: 10px;">
+                {{training_message}}
               </div>
-            </p>
+            </div>
           </div>
+          </p>
+        </div>
     </section>
   </div>
 
