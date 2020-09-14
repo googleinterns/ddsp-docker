@@ -58,15 +58,14 @@
             </label>
           </form>
           <div style="margin: 10px;">
-            {{preprocessing_message}}
+            <!-- {{preprocessing_message}} -->
+            {{message}}
           </div>
         </div>
         <div>
           <h3>Training job submission</h3>
-          <p>
           <div class="container">
             <div [hidden]="submitted">
-              <!-- <h4>Training parameters</h1> -->
               <form action="/submit" method="POST">
                 <div class="form-group">
                   <label>Batch Size</label>
@@ -103,18 +102,25 @@
                   <input type="number" class="form-control" id="early_stop_loss_value" name="early_stop_loss_value"
                     style="width: 75px;" value="5" step="0.1"><br>
                 </div>
-                <!-- <button type="submit" class="action gray">Submit</button> -->
                 <label class="action gray" style='width:100%;'>
                   <input type="submit" class="action gray" />
                   Submit
                 </label>
               </form>
-              <div style="margin: 10px;">
+              <!-- <div style="margin: 10px;">
                 {{training_message}}
-              </div>
+              </div> -->
+              <form action="/check_status" method="POST" enctype="multipart/form-data">
+                <label class="action gray" style='width:100%;'>
+                  <input type="submit" class="action gray" />
+                  Check training job status
+                </label>
+              </form>
+              <!-- <div style="margin: 10px;">
+                {{status_message}}
+              </div> -->
             </div>
           </div>
-          </p>
         </div>
     </section>
   </div>

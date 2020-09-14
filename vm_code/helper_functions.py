@@ -56,6 +56,9 @@ def run_preprocessing(bucket_name, region):
 
 def submit_job(request, bucket_name, region):
   """Submit training job to AI Platform"""
+  if "PREPROCESSING_JOB_NAME" not in os.environ:
+    return "PREPROCESSING_NOT_SUBMITTED"
+
   preprocessing_status = check_job_status(os.environ["PREPROCESSING_JOB_NAME"])
   if preprocessing_status in ["RUNNING", "QUEUED", "PREPARING"]:
     return "PREPROCESSING_NOT_FINISHED"
@@ -65,6 +68,7 @@ def submit_job(request, bucket_name, region):
     job_name = (
         "training_job_" +
         str(int((datetime.now()-datetime(1970, 1, 1)).total_seconds())))
+    os.environ["JOB_NAME"] = job_name
     config_file = os.path.join(
         os.getcwd(),
         "../magenta_docker/config_multiple_vms.yaml")

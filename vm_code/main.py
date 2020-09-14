@@ -54,7 +54,7 @@ def preprocess():
     message = 'Preprocessing started successfully!'
   else:
     message = 'There was a problem running preprocessing. Try once more!'
-  return render_template('index_vm.html', preprocessing_message=message)
+  return render_template('index_vm.html', message=message)
 
 @app.route('/submit', methods=['POST'])
 def job_submission():
@@ -73,9 +73,24 @@ def job_submission():
     message = 'Preprocessing is not yet finished. Try once more in a minute!'
   elif status == 'PREPROCESSING_ERROR':
     message = 'Preprocessing job failed. Run it once more!'
+  elif status == 'PREPROCESSING_NOT_SUBMITTED':
+    message = 'You haven\'t preprocessed the data!'
   else:
     message = 'There was a problem starting training. Try once more!'
-  return render_template('index_vm.html', training_message=message)
+  return render_template('index_vm.html', message=message)
+
+@app.route('/check_status', methods=['POST'])
+def check_status():
+  if 'JOB_NAME' in os.environ:
+    status = helper_functions.check_job_status(os.environ['JOB_NAME'])
+    if status == 'JOB_NOT_EXIST':
+      message = 'You haven\'t submitted training job yet!'
+    else:
+      message = 'Training job status: ' + status
+  else:
+    message = 'You haven\'t submitted training job yet!'
+
+  return render_template('index_vm.html', message=message)
 
 if __name__ == '__main__':
   app.run(host='127.0.0.1', port=8080, debug=True)
