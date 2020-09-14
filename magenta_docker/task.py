@@ -1,4 +1,4 @@
-"""Script for running a containerised training on Google Cloud AI Platform."""
+"""Script for running a containerized training on Google Cloud AI Platform."""
 
 import json
 import os
