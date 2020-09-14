@@ -55,6 +55,7 @@
                             <input type="string" class="form-control" id="api_key" style="width: 90%;">
                         </div>
                     </div>
+
                     <input type="button" onclick="logIn()" id="log_in" class="inputfile" />
                     <label for="log_in" class="action gray" style="width: 100%;">
                         Log in
@@ -62,6 +63,11 @@
                 </div>
                 <div id="vm_control" style="display: none;">
                     <h3>You have successfully logged in!</h3>
+                    <div>
+                        Before creating a VM, <a
+                            href="https://console.cloud.google.com/flows/enableapi?apiid=compute.googleapis.com"
+                            target="_blank">enable Compute Engine API</a>.
+                    </div>
                     <input type="button" onclick="setUpVM()" id="set_up_vm" class="inputfile" />
                     <label for="set_up_vm" class="action gray" style="width: 32%;">
                         Set up VM

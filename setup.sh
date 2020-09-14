@@ -14,12 +14,13 @@ virtualenv -p python3 /opt/app/vm_code/env
 source /opt/app/vm_code/env/bin/activate
 /opt/app/vm_code/env/bin/pip install -r /opt/app/vm_code/requirements.txt
 
-
 gcloud compute firewall-rules create default-allow-http-8080 \
 --allow tcp:8080 \
 --source-ranges 0.0.0.0/0 \
 --target-tags http-server \
 --description "Allow port 8080 access to http-server"
+
+gcloud services enable ml.googleapis.com containerregistry.googleapis.com
 
 source docker_setup.sh &
 
