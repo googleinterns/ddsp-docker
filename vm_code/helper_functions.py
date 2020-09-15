@@ -2,11 +2,13 @@
 from datetime import datetime
 import os
 import subprocess
+from os.path import basename
 from subprocess import PIPE
+from zipfile import ZipFile
 
 def create_bucket(bucket_name, region):
   """Creates a new bucket."""
-  create_command = "gsutil mb -l" + region + " " + bucket_name
+  create_command = "gsutil mb -l " + region + " " + bucket_name
   os.system(create_command)
 
 def upload_blob(bucket_name, uploads_dir):
@@ -16,6 +18,32 @@ def upload_blob(bucket_name, uploads_dir):
       uploads_dir + " " +
       bucket_name + "/audio")
   os.system(upload_command)
+
+def download_file(bucket_name, downloads_dir, file_name):
+  """Downloads file from bucket"""
+  download_command = (
+      "gsutil -m cp " +
+      bucket_name + "/model/" +
+      file_name + " " +
+      downloads_dir)
+  os.system(download_command)
+
+def get_model(bucket_name, downloads_dir, instance_path):
+  """Creates an archive with the model."""
+  download_file(bucket_name, downloads_dir, "checkpoint")
+  download_file(bucket_name, downloads_dir, "operative_config-0.gin")
+  download_file(bucket_name, downloads_dir, "data_statistics.pkl")
+
+  zip_path = os.path.join(instance_path, 'model.zip')
+  with ZipFile(zip_path, 'w') as zipObj:
+    for folderName, subfolders, filenames in os.walk(downloads_dir):
+      for filename in filenames:
+        #create complete filepath of file in directory
+        filePath = os.path.join(folderName, filename)
+        # Add file to zip
+        zipObj.write(filePath, basename(filePath))
+    zipObj.close()
+  
 
 def run_preprocessing(bucket_name, region):
   """Runs preprocessing job on AI Platform"""
@@ -55,7 +83,7 @@ def run_preprocessing(bucket_name, region):
   return "ERROR"
 
 def submit_job(request, bucket_name, region):
-  """Submit training job to AI Platform"""
+  """Submits training job to AI Platform"""
   if "PREPROCESSING_JOB_NAME" not in os.environ:
     return "PREPROCESSING_NOT_SUBMITTED"
 
@@ -69,9 +97,22 @@ def submit_job(request, bucket_name, region):
         "training_job_" +
         str(int((datetime.now()-datetime(1970, 1, 1)).total_seconds())))
     os.environ["JOB_NAME"] = job_name
-    config_file = os.path.join(
-        os.getcwd(),
-        "../magenta_docker/config_multiple_vms.yaml")
+    if str(request.form['batch_size']) in ['8', '16']:
+        config_file = os.path.join(
+            os.getcwd(),
+            "../magenta_docker/config_single_vm.yaml")
+    if str(request.form['batch_size']) == '32':
+        config_file = os.path.join(
+            os.getcwd(),
+            "../magenta_docker/config_1vm_2gpus.yaml")
+    if str(request.form['batch_size']) == '64':
+        config_file = os.path.join(
+            os.getcwd(),
+            "../magenta_docker/config_2vms_4gpus.yaml")
+    if str(request.form['batch_size']) == '128':  
+        config_file = os.path.join(
+            os.getcwd(),
+            "../magenta_docker/config_multiple_vms.yaml")
     image_uri = os.environ["IMAGE_URI"]
     early_stop_loss_value = str(request.form["early_stop_loss_value"])
     job_submission_command = (

@@ -2,7 +2,7 @@
 from datetime import datetime
 import os
 
-from flask import abort, Flask, render_template, request
+from flask import abort, Flask, render_template, request, send_file
 from werkzeug.utils import secure_filename
 
 import helper_functions
@@ -13,6 +13,7 @@ app = Flask(
     static_folder='../web_interface')
 app.config['UPLOAD_EXTENSIONS'] = ['.wav', '.mp3']
 app.config['UPLOAD_PATH'] = 'uploads'
+app.config['DOWNLOAD_PATH'] = 'downloads'
 app.config['REGION'] = 'europe-west4'
 app.config['BUCKET_NAME'] = (
     'gs://ddsp-train-' +
@@ -21,6 +22,8 @@ app.config['BUCKET_NAME'] = (
 # Create a directory in a known location to save files to.
 uploads_dir = os.path.join(app.instance_path, app.config['UPLOAD_PATH'])
 os.makedirs(uploads_dir, exist_ok=True)
+downloads_dir = os.path.join(app.instance_path, app.config['DOWNLOAD_PATH'])
+os.makedirs(downloads_dir, exist_ok=True)
 
 @app.route('/')
 def main():
@@ -91,6 +94,24 @@ def check_status():
     message = 'You haven\'t submitted training job yet!'
 
   return render_template('index_vm.html', message=message)
+
+@app.route('/download', methods=['POST'])
+def download_model():
+  if 'JOB_NAME' in os.environ:
+    status = helper_functions.check_job_status(os.environ['JOB_NAME'])
+    if status == 'JOB_NOT_EXIST':
+      message = 'You haven\'t submitted training job yet!'
+      return render_template('index_vm.html', message=message)
+    else:
+      message = 'Training job status: ' + status
+      return render_template('index_vm.html', message=message)
+  else:
+    message = 'You haven\'t submitted training job yet!'
+    return render_template('index_vm.html', message=message)
+  helper_functions.get_model(app.config['BUCKET_NAME'], downloads_dir, app.instance_path)
+  download_zip = os.path.join(app.instance_path, 'model.zip')
+  return send_file(download_zip, as_attachment=True)
+
 
 if __name__ == '__main__':
   app.run(host='127.0.0.1', port=8080, debug=True)
