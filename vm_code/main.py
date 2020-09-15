@@ -44,6 +44,15 @@ def upload_files():
   helper_functions.upload_blob(app.config['BUCKET_NAME'], uploads_dir)
   return render_template('index_vm.html')
 
+@app.route('/delete_bucket', methods=['POST'])
+def delete_bucket():
+  status = helper_functions.delete_bucket(app.config['BUCKET_NAME'])
+  if status == 'ERROR':
+    message = 'There was a problem deleting bucket :/'
+  else:
+    message = 'Bucket deleted successfully!'
+  return render_template('index_vm.html', message=message)
+
 @app.route('/preprocess', methods=['POST'])
 def preprocess():
   status = helper_functions.run_preprocessing(

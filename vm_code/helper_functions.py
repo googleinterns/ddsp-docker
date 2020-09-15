@@ -28,6 +28,19 @@ def download_file(bucket_name, downloads_dir, file_name):
       downloads_dir)
   os.system(download_command)
 
+def delete_bucket(bucket_name):
+  """Deletes the bucket."""
+  delete_command = "gsutil rm -r " + bucket_name
+  _, command_err = subprocess.Popen(
+      delete_command.split(),
+      stdin=PIPE,
+      stdout=PIPE,
+      stderr=PIPE).communicate()
+  if "Exception" in str(command_err):
+    return "ERROR"
+  else:
+    return "BUCKET_DELETED"
+
 def get_model(bucket_name, downloads_dir, instance_path):
   """Creates an archive with the model."""
   download_file(bucket_name, downloads_dir, "checkpoint")

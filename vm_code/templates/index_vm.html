@@ -57,10 +57,15 @@
               Preprocess
             </label>
           </form>
-          <div style="margin: 10px;">
-            <!-- {{preprocessing_message}} -->
+          <div style="margin: 10px; height:fit-content;">
             {{message}}
           </div>
+          <form action="/delete_bucket" method="POST" enctype="multipart/form-data" style="margin-top:auto;">
+            <label class="action gray" style='width:100%;'>
+              <input type="submit" class="action gray" />
+              Delete bucket
+            </label>
+          </form>
         </div>
         <div>
           <h3>Training job submission</h3>
@@ -107,18 +112,12 @@
                   Submit
                 </label>
               </form>
-              <!-- <div style="margin: 10px;">
-                {{training_message}}
-              </div> -->
               <form action="/check_status" method="POST" enctype="multipart/form-data">
                 <label class="action gray" style='width:100%;'>
                   <input type="submit" class="action gray" />
                   Check training job status
                 </label>
               </form>
-              <!-- <div style="margin: 10px;">
-                {{status_message}}
-              </div> -->
               <form action="/download" method="POST" enctype="multipart/form-data">
                 <label class="action gray" style='width:100%;'>
                   <input type="submit" class="action gray" />
