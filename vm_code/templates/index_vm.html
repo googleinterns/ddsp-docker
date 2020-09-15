@@ -67,6 +67,17 @@
               Delete bucket
             </label>
           </form>
+          <form action="/tensorboard" method="POST" enctype="multipart/form-data">
+                <label class="action gray" style='width:100%;'>
+                  <input type="submit" class="action gray" />
+                  Upload new logs to TensorBoard
+                </label>
+              </form>
+             {% if link %}
+             <div style="margin: 10px; height:fit-content;">
+            <a href={{link}} target="_blank">Observe your experiment on TensorBoard</a>
+                 </div>
+            {% endif %}
         </div>
         <div>
           <h3>Training job submission</h3>
