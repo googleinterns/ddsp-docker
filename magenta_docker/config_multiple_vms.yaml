@@ -1,7 +1,6 @@
 # Recommended batch_size: 128
 # Recommended learning_rate: 0.001
 # Recommended number of steps: 15000
-# 
 trainingInput:
   scaleTier: CUSTOM
   # Configures a chief worker with 2 T4 GPUs
