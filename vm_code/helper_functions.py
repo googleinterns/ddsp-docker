@@ -32,7 +32,7 @@ def get_model(bucket_name, downloads_dir, instance_path):
   """Creates an archive with the model."""
   download_file(bucket_name, downloads_dir, "checkpoint")
   download_file(bucket_name, downloads_dir, "operative_config-0.gin")
-  download_file(bucket_name, downloads_dir, "data_statistics.pkl")
+  download_file(bucket_name, downloads_dir, "dataset_statistics.pkl")
 
   zip_path = os.path.join(instance_path, 'model.zip')
   with ZipFile(zip_path, 'w') as zipObj:

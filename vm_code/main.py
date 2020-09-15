@@ -102,15 +102,16 @@ def download_model():
     if status == 'JOB_NOT_EXIST':
       message = 'You haven\'t submitted training job yet!'
       return render_template('index_vm.html', message=message)
+    elif status == 'SUCCEEDED':
+      helper_functions.get_model(app.config['BUCKET_NAME'], downloads_dir, app.instance_path)
+      download_zip = os.path.join(app.instance_path, 'model.zip')
+      return send_file(download_zip, as_attachment=True)
     else:
       message = 'Training job status: ' + status
       return render_template('index_vm.html', message=message)
   else:
     message = 'You haven\'t submitted training job yet!'
     return render_template('index_vm.html', message=message)
-  helper_functions.get_model(app.config['BUCKET_NAME'], downloads_dir, app.instance_path)
-  download_zip = os.path.join(app.instance_path, 'model.zip')
-  return send_file(download_zip, as_attachment=True)
 
 
 if __name__ == '__main__':
