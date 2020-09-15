@@ -4,7 +4,7 @@ import os
 import subprocess
 from os.path import basename
 from subprocess import PIPE
-from zipfile import ZipFile
+from zipfile36 import ZipFile
 
 def create_bucket(bucket_name, region):
   """Creates a new bucket."""
