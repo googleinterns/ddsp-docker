@@ -47,16 +47,15 @@ def get_model(bucket_name, downloads_dir, instance_path):
   download_file(bucket_name, downloads_dir, "operative_config-0.gin")
   download_file(bucket_name, downloads_dir, "dataset_statistics.pkl")
 
-  zip_path = os.path.join(instance_path, 'model.zip')
-  with ZipFile(zip_path, 'w') as zipObj:
-    for folderName, subfolders, filenames in os.walk(downloads_dir):
+  zip_path = os.path.join(instance_path, "model.zip")
+  with ZipFile(zip_path, "w") as zip_obj:
+    for folder_name, subfolders, filenames in os.walk(downloads_dir):
       for filename in filenames:
         #create complete filepath of file in directory
-        filePath = os.path.join(folderName, filename)
+        file_path = os.path.join(folder_name, filename)
         # Add file to zip
-        zipObj.write(filePath, basename(filePath))
-    zipObj.close()
-  
+        zip_obj.write(file_path, basename(file_path))
+    zip_obj.close()
 
 def run_preprocessing(bucket_name, region):
   """Runs preprocessing job on AI Platform"""
@@ -106,25 +105,20 @@ def submit_job(request, bucket_name, region):
 
   if preprocessing_status == "SUCCEEDED":
     os.system("export PATH=/usr/local/google/home/$USER/.local/bin:$PATH")
-    job_name = (
-        "training_job_" +
+    job_name = ("training_job_" +
         str(int((datetime.now()-datetime(1970, 1, 1)).total_seconds())))
     os.environ["JOB_NAME"] = job_name
-    if str(request.form['batch_size']) in ['8', '16']:
-        config_file = os.path.join(
-            os.getcwd(),
+    if str(request.form["batch_size"]) in ["8", "16"]:
+      config_file = os.path.join(os.getcwd(),
             "../magenta_docker/config_single_vm.yaml")
-    if str(request.form['batch_size']) == '32':
-        config_file = os.path.join(
-            os.getcwd(),
+    if str(request.form["batch_size"]) == "32":
+      config_file = os.path.join(os.getcwd(),
             "../magenta_docker/config_1vm_2gpus.yaml")
-    if str(request.form['batch_size']) == '64':
-        config_file = os.path.join(
-            os.getcwd(),
+    if str(request.form["batch_size"]) == "64":
+      config_file = os.path.join(os.getcwd(),
             "../magenta_docker/config_2vms_4gpus.yaml")
-    if str(request.form['batch_size']) == '128':  
-        config_file = os.path.join(
-            os.getcwd(),
+    if str(request.form["batch_size"]) == "128":
+      config_file = os.path.join(os.getcwd(),
             "../magenta_docker/config_multiple_vms.yaml")
     image_uri = os.environ["IMAGE_URI"]
     early_stop_loss_value = str(request.form["early_stop_loss_value"])
