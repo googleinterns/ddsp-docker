@@ -2,6 +2,7 @@
 from datetime import datetime
 import os
 import subprocess
+import tensorflow as tf
 from os.path import basename
 from subprocess import PIPE
 from zipfile36 import ZipFile
@@ -43,7 +44,8 @@ def delete_bucket(bucket_name):
 
 def get_model(bucket_name, downloads_dir, instance_path):
   """Creates an archive with the model."""
-  download_file(bucket_name, downloads_dir, "checkpoint")
+  latest_checkpoint_fname = os.path.basename(tf.train.latest_checkpoint(bucket_name + '/model'))
+  download_file(bucket_name, downloads_dir, latest_checkpoint_fname)
   download_file(bucket_name, downloads_dir, "operative_config-0.gin")
   download_file(bucket_name, downloads_dir, "dataset_statistics.pkl")
 
