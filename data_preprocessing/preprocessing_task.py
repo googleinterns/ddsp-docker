@@ -8,6 +8,7 @@ from absl import flags
 from absl import logging
 import ddsp.training
 import magenta_stats_utils.utils as utils
+import tensorflow.compat.v2 as tf
 
 FLAGS = flags.FLAGS
 
@@ -36,11 +37,18 @@ def main(unused_argv):
   logging.info('TF_RECORD filepattern: %s', tfrecord_filepattern)
   data_provider = ddsp.training.data.TFRecordProvider(
       tfrecord_filepattern)
-  dataset = data_provider.get_dataset(shuffle=False)
   pickle_file_path = os.path.join(
       FLAGS.statistics_path,
       'dataset_statistics.pkl')
   utils.save_dataset_statistics(data_provider, pickle_file_path)
+
+  with tf.io.gfile.GFile(pickle_file_path, 'rb') as f:
+    stats = f.read()
+
+  stats = stats.replace(b'magenta_stats_utils.', b'ddsp.colab.colab_')
+
+  with tf.io.gfile.GFile(pickle_file_path, 'wb') as f:
+    f.write(stats)
 
 if __name__ == '__main__':
   flags.mark_flag_as_required('input_audio_filepatterns')
