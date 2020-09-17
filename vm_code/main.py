@@ -112,14 +112,12 @@ def download_model():
     else:
       message = 'Training job status: ' + status
       return render_template('index_vm.html', message=message)
-  else:
-    message = 'You haven\'t submitted training job yet!'
-    return render_template('index_vm.html', message=message)
 
 @app.route('/tensorboard', methods=['POST'])
 def enable_tensorboard():
-  if 'JOB_NAME' in os.environ:
-    status = helper_functions.check_job_status(os.environ['JOB_NAME'])
+  #if 'JOB_NAME' in os.environ:
+    #status = helper_functions.check_job_status(os.environ['JOB_NAME'])
+    status = 'RUNNING'
     if status == 'JOB_NOT_EXIST':
       message = 'You haven\'t submitted training job yet!'
       return render_template('index_vm.html', message=message)
@@ -135,13 +133,14 @@ def enable_tensorboard():
         link = subprocess.getoutput(tensorboard_command)
         link = link.split()[-1]
         app.config['TENSORBOARD_ID'] = link.split('/')[-2]
+        print(app.config['TENSORBOARD_ID'])
         return render_template('index_vm.html', link=link)
     else:
       message = 'Training job status: ' + status
       return render_template('index_vm.html', message=message)
-  else:
-    message = 'You haven\'t submitted training job yet!'
-    return render_template('index_vm.html', message=message)
+  #else:
+   # message = 'You haven\'t submitted training job yet!'
+    #return render_template('index_vm.html', message=message)
 
 if __name__ == '__main__':
   app.run(host='127.0.0.1', port=8080, debug=True)
