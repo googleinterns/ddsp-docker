@@ -34,7 +34,12 @@ function authorization() {
     }, function (authResult) {
         if (authResult && !authResult.error) {
             initializeApi();
-            switchComponents('vm_control', 'login');
+            if (!checkFormFilledIn) {
+                switchComponents('vm_control', 'login');
+            }
+            else {
+                window.alert('Auth was not successful');
+            }
         } else {
             window.alert('Auth was not successful');
         }
@@ -47,6 +52,11 @@ function switchComponents(idToShow, idToHide) {
     document.getElementById(idToHide).style.display = 'none';
 }
 
+function checkFormFilledIn() {
+    return (document.getElementById("api_key").value != "" &&
+        document.getElementById("client_id").value != "" &&
+        document.getElementById("project_id").value != "")
+}
 
 function logIn() {
     PROJECT_ID = document.getElementById("project_id").value;
@@ -184,7 +194,7 @@ function getInstance() {
     executeRequest(
         request,
         4,
-        function(resp){
+        function (resp) {
             vmAddress = resp.result['networkInterfaces'][0]['accessConfigs'][0]['natIP'];
             window.open('http://' + vmAddress + ':8080', '_blank');
         },
@@ -213,7 +223,7 @@ function deleteDisk() {
     executeRequest(
         request,
         4,
-        function(resp){
+        function (resp) {
             window.alert('Successfully cleaned up environment');
         },
         () => {
