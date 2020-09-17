@@ -26,25 +26,25 @@ function initializeApi() {
 }
 
 function authorization() {
-    gapi.client.setApiKey(API_KEY);
-    gapi.auth.authorize({
-        client_id: CLIENT_ID,
-        scope: SCOPES,
-        immediate: false
-    }, function (authResult) {
-        if (authResult && !authResult.error) {
-            initializeApi();
-            if (!checkFormFilledIn) {
+    if (checkFormFilledIn()) {
+        gapi.client.setApiKey(API_KEY);
+        gapi.auth.authorize({
+            client_id: CLIENT_ID,
+            scope: SCOPES,
+            immediate: false
+        }, function (authResult) {
+            if (authResult && !authResult.error) {
+                initializeApi();
                 switchComponents('vm_control', 'login');
-            }
-            else {
+            } else {
                 window.alert('Auth was not successful');
             }
-        } else {
-            window.alert('Auth was not successful');
         }
+        );
     }
-    );
+    else {
+        window.alert('Auth was not successful, fill in the login info');
+    }
 }
 
 function switchComponents(idToShow, idToHide) {
@@ -53,9 +53,7 @@ function switchComponents(idToShow, idToHide) {
 }
 
 function checkFormFilledIn() {
-    return (document.getElementById("api_key").value != "" &&
-        document.getElementById("client_id").value != "" &&
-        document.getElementById("project_id").value != "")
+    return PROJECT_ID != "" && CLIENT_ID != "" && API_KEY != "";
 }
 
 function logIn() {

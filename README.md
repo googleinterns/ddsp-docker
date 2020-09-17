@@ -11,7 +11,7 @@ There are a few steps you need to complete before using our Web Interface.
 
 ### Activate [Google Cloud Platform's Free Trial](https://cloud.google.com/free)
 If you are a new GCP user you will get $300 to spent on it. That's more than enough to train DDSP Autoencoder.
-### Create [GCP project](https://console.cloud.google.com/projectcreate)
+### Create a [GCP project](https://console.cloud.google.com/projectcreate)
 ### Get right credentials
 1. Go to [APIs & Services](https://console.cloud.google.com/apis) in the GCP Console.
 2. In the left-most panel click on [OAuth consent screen](https://console.cloud.google.com/apis/credentials/consent).
