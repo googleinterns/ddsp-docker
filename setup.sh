@@ -19,6 +19,12 @@ gcloud compute firewall-rules create default-allow-http-8080 \
 --target-tags http-server \
 --description "Allow port 8080 access to http-server"
 
+gcloud compute firewall-rules create default-allow-http-6006 \
+--allow tcp:6006 \
+--source-ranges 0.0.0.0/0 \
+--target-tags http-server \
+--description "Allow port 6006 access to http-server"
+
 gcloud services enable ml.googleapis.com containerregistry.googleapis.com
 
 source docker_setup.sh &
