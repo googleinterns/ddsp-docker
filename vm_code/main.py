@@ -136,6 +136,7 @@ def enable_tensorboard():
         os.system(tensorboard_command)
         link = subprocess.check_output("gcloud compute instances describe ddsp-docker --zone=europe-west4-a --format='get(networkInterfaces[0].accessConfigs[0].natIP)'", shell=True)
         link = str(link)
+        link = link[2:-3]
         link = 'http://' + link + ':6006/'
         return render_template('index_vm.html', link=link)
     else:
