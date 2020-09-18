@@ -16,9 +16,7 @@ app.config['UPLOAD_EXTENSIONS'] = ['.wav', '.mp3']
 app.config['UPLOAD_PATH'] = 'uploads'
 app.config['DOWNLOAD_PATH'] = 'downloads'
 app.config['REGION'] = 'europe-west4'
-app.config['BUCKET_NAME'] = (
-    'gs://ddsp-train-' +
-    str(int((datetime.now()-datetime(1970, 1, 1)).total_seconds())))
+app.config['BUCKET_NAME'] = 'ddsp-train-1599841972'
 app.config['TENSORBOARD_ID'] = ''
 
 # Create a directory in a known location to save files to.
@@ -122,19 +120,12 @@ def enable_tensorboard():
       message = 'You haven\'t submitted training job yet!'
       return render_template('index_vm.html', message=message)
     elif status == 'RUNNING':
-      if app.config['TENSORBOARD_ID'] != '':
-        delete_experiment = ('tensorboard dev delete --experiment_id ' +
-                             app.config['TENSORBOARD_ID'])
-        os.system(delete_experiment)
-      else:
-        tensorboard_command = ('tensorboard dev upload --logdir ' +
+        tensorboard_command = ('tensorboard --logdir ' +
                                app.config['BUCKET_NAME'] + '/model ' +
-                               '--name DDSP_Training --one_shot')
-        link = subprocess.getoutput(tensorboard_command)
-        link = link.split()[-1]
-        app.config['TENSORBOARD_ID'] = link.split('/')[-2]
-        print(app.config['TENSORBOARD_ID'])
-        return render_template('index_vm.html', link=link)
+                               '--bind_all &')
+        print(tensorboard_command)
+        os.system(tensorboard_command)
+        return render_template('index_vm.html', link='http://127.0.0.1:6006/')
     else:
       message = 'Training job status: ' + status
       return render_template('index_vm.html', message=message)
