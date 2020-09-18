@@ -16,7 +16,7 @@ app.config['UPLOAD_EXTENSIONS'] = ['.wav', '.mp3']
 app.config['UPLOAD_PATH'] = 'uploads'
 app.config['DOWNLOAD_PATH'] = 'downloads'
 app.config['REGION'] = 'europe-west4'
-app.config['BUCKET_NAME'] = 'ddsp-train-1599841972'
+app.config['BUCKET_NAME'] = 'gs://ddsp-train-1599841972'
 app.config['TENSORBOARD_ID'] = ''
 
 # Create a directory in a known location to save files to.
@@ -111,6 +111,16 @@ def download_model():
       message = 'Training job status: ' + status
       return render_template('index_vm.html', message=message)
 
+@app.route('/delete_bucket', methods=['POST'])
+def delete_bucket():
+  status = helper_functions.delete_bucket(app.config['BUCKET_NAME'])
+  if status == 'ERROR':
+    message = 'There was a problem deleting bucket :/'
+  else:
+    message = 'Bucket deleted successfully!'
+  return render_template('index_vm.html', message=message)
+
+
 @app.route('/tensorboard', methods=['POST'])
 def enable_tensorboard():
   #if 'JOB_NAME' in os.environ:
@@ -122,10 +132,12 @@ def enable_tensorboard():
     elif status == 'RUNNING':
         tensorboard_command = ('tensorboard --logdir ' +
                                app.config['BUCKET_NAME'] + '/model ' +
-                               '--bind_all &')
-        print(tensorboard_command)
+                               '--port 6006 --bind_all &')
         os.system(tensorboard_command)
-        return render_template('index_vm.html', link='http://127.0.0.1:6006/')
+        link = subprocess.check_output('gcloud compute instances describe ddsp-docker --zone=europe-west4-a'
+                  '--format=\'get(networkInterfaces[0].accessConfigs[0].natIP)\'')
+        link = 'http://' + link + ':6006/'
+        return render_template('index_vm.html', link=link)
     else:
       message = 'Training job status: ' + status
       return render_template('index_vm.html', message=message)
