@@ -44,13 +44,14 @@ def delete_bucket(bucket_name):
 
 def get_model(bucket_name, downloads_dir, instance_path):
   """Creates an archive with the model."""
-  latest_checkpoint_fname = os.path.basename(tf.train.latest_checkpoint(bucket_name + '/model'))
+  latest_checkpoint_fname = os.path.basename(tf.train.latest_checkpoint\
+                                             (bucket_name + "/model")) + "*"
   download_file(bucket_name, downloads_dir, latest_checkpoint_fname)
   download_file(bucket_name, downloads_dir, "operative_config-0.gin")
   download_file(bucket_name, downloads_dir, "dataset_statistics.pkl")
 
-  zip_path = os.path.join(instance_path, 'model.zip')
-  with ZipFile(zip_path, 'w') as zipObj:
+  zip_path = os.path.join(instance_path, "model.zip")
+  with ZipFile(zip_path, "w") as zipObj:
     for folderName, subfolders, filenames in os.walk(downloads_dir):
       for filename in filenames:
         #create complete filepath of file in directory
