@@ -44,28 +44,29 @@ def delete_bucket(bucket_name):
 
 def get_model(bucket_name, downloads_dir, instance_path):
   """Creates an archive with the model."""
-  latest_checkpoint_fname = os.path.basename(tf.train.latest_checkpoint(bucket_name + '/model'))
+  latest_checkpoint_fname = os.path.basename(tf.train.latest_checkpoint\
+                                             (bucket_name + "/model")) + "*"
   download_file(bucket_name, downloads_dir, latest_checkpoint_fname)
   download_file(bucket_name, downloads_dir, "operative_config-0.gin")
   download_file(bucket_name, downloads_dir, "dataset_statistics.pkl")
 
-  zip_path = os.path.join(instance_path, 'model.zip')
-  with ZipFile(zip_path, 'w') as zipObj:
-    for folderName, subfolders, filenames in os.walk(downloads_dir):
+  zip_path = os.path.join(instance_path, "model.zip")
+  with ZipFile(zip_path, "w") as zip_obj:
+    for folder_name, subfolders, filenames in os.walk(downloads_dir):
       for filename in filenames:
         #create complete filepath of file in directory
-        filePath = os.path.join(folderName, filename)
+        file_path = os.path.join(folder_name, filename)
         # Add file to zip
-        zipObj.write(filePath, basename(filePath))
-    zipObj.close()
-  
+        zip_obj.write(file_path, basename(file_path))
+    zip_obj.close()
 
 def run_preprocessing(bucket_name, region):
   """Runs preprocessing job on AI Platform"""
   job_name = (
       "preprocessing_job_" +
       str(int((datetime.now()-datetime(1970, 1, 1)).total_seconds())))
-  os.environ["PREPROCESSING_JOB_NAME"] = job_name
+  set_job_name = "export PREPROCESSING_JOB_NAME=" + job_name
+  os.system(set_job_name)
   input_audio_filepatterns = os.path.join(bucket_name, "audio/*")
   output_tfrecord_path = os.path.join(bucket_name, "tf_record/train.tfrecord")
   statistics_path = os.path.join(bucket_name, "model/")
@@ -73,7 +74,7 @@ def run_preprocessing(bucket_name, region):
   config_file = os.path.join(
       os.getcwd(),
       "../magenta_docker/config_single_vm.yaml")
-  image_uri = os.environ["PREPROCESSING_IMAGE_URI"]
+  image_uri = subprocess.check_output("$PREPROCESSING_IMAGE_URI", shell=True)
   job_submission_command = (
       "gcloud ai-platform jobs submit training " + job_name +
       " --region " + region +
@@ -99,10 +100,13 @@ def run_preprocessing(bucket_name, region):
 
 def submit_job(request, bucket_name, region):
   """Submits training job to AI Platform"""
-  if "PREPROCESSING_JOB_NAME" not in os.environ:
+  preprocessing_job_name = subprocess.check_output("$PREPROCESSING_JOB_NAME",
+                                                   shell=True)
+  if not preprocessing_job_name:
     return "PREPROCESSING_NOT_SUBMITTED"
 
-  preprocessing_status = check_job_status(os.environ["PREPROCESSING_JOB_NAME"])
+  job_name = subprocess.check_output("$PREPROCESSING_JOB_NAME", shell=True)
+  preprocessing_status = check_job_status(job_name)
   if preprocessing_status in ["RUNNING", "QUEUED", "PREPARING"]:
     return "PREPROCESSING_NOT_FINISHED"
 
@@ -111,24 +115,25 @@ def submit_job(request, bucket_name, region):
     job_name = (
         "training_job_" +
         str(int((datetime.now()-datetime(1970, 1, 1)).total_seconds())))
-    os.environ["JOB_NAME"] = job_name
-    if str(request.form['batch_size']) in ['8', '16']:
-        config_file = os.path.join(
+    set_job_name = "export JOB_NAME=" + job_name
+    os.system(set_job_name)
+    if str(request.form["batch_size"]) in ["8", "16"]:
+      config_file = os.path.join(
             os.getcwd(),
             "../magenta_docker/config_single_vm.yaml")
-    if str(request.form['batch_size']) == '32':
-        config_file = os.path.join(
+    if str(request.form["batch_size"]) == "32":
+      config_file = os.path.join(
             os.getcwd(),
             "../magenta_docker/config_1vm_2gpus.yaml")
-    if str(request.form['batch_size']) == '64':
-        config_file = os.path.join(
+    if str(request.form["batch_size"]) == "64":
+      config_file = os.path.join(
             os.getcwd(),
             "../magenta_docker/config_2vms_4gpus.yaml")
-    if str(request.form['batch_size']) == '128':  
-        config_file = os.path.join(
+    if str(request.form["batch_size"]) == "128":
+      config_file = os.path.join(
             os.getcwd(),
             "../magenta_docker/config_multiple_vms.yaml")
-    image_uri = os.environ["IMAGE_URI"]
+    image_uri = subprocess.check_output("$IMAGE_URI", shell=True)
     early_stop_loss_value = str(request.form["early_stop_loss_value"])
     job_submission_command = (
         "gcloud ai-platform jobs submit training " + job_name +
@@ -152,6 +157,9 @@ def submit_job(request, bucket_name, region):
 
     if "master_config.image_uri Error" in str(command_err):
       return "DOCKER_IMAGE_ERROR"
+
+    if "Quota" in str(command_err):
+      return "QUOTA_ERROR"
 
     if "ERROR" not in str(command_err):
       return "JOB_SUBMITTED"

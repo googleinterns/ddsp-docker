@@ -16,7 +16,9 @@ app.config['UPLOAD_EXTENSIONS'] = ['.wav', '.mp3']
 app.config['UPLOAD_PATH'] = 'uploads'
 app.config['DOWNLOAD_PATH'] = 'downloads'
 app.config['REGION'] = 'europe-west4'
-app.config['BUCKET_NAME'] = 'gs://ddsp-train-1599841972'
+app.config['BUCKET_NAME'] = (
+    'gs://ddsp-train-' +
+    str(int((datetime.now()-datetime(1970, 1, 1)).total_seconds())))
 app.config['TENSORBOARD_ID'] = ''
 
 # Create a directory in a known location to save files to.
@@ -70,6 +72,10 @@ def job_submission():
     message = (
         'Docker image is not ready for training. '
         'Try once more in a minute!')
+  elif status == 'QUOTA_ERROR':
+    message = (
+        'Your project doesn\'t have enough quota '
+        'for this setup. Try smaller batch size!')
   elif status == 'JOB_SUBMITTED':
     message = 'Training started successfully!'
   elif status == 'PREPROCESSING_NOT_FINISHED':
@@ -84,8 +90,9 @@ def job_submission():
 
 @app.route('/check_status', methods=['POST'])
 def check_status():
-  if 'JOB_NAME' in os.environ:
-    status = helper_functions.check_job_status(os.environ['JOB_NAME'])
+  job_name = subprocess.check_output('$JOB_NAME', shell=True)
+  if job_name:
+    status = helper_functions.check_job_status(job_name)
     if status == 'JOB_NOT_EXIST':
       message = 'You haven\'t submitted training job yet!'
     else:
@@ -97,8 +104,9 @@ def check_status():
 
 @app.route('/download', methods=['POST'])
 def download_model():
-  if 'JOB_NAME' in os.environ:
-    status = helper_functions.check_job_status(os.environ['JOB_NAME'])
+  job_name = subprocess.check_output('$JOB_NAME', shell=True)
+  if job_name:
+    status = helper_functions.check_job_status(job_name)
     if status == 'JOB_NOT_EXIST':
       message = 'You haven\'t submitted training job yet!'
       return render_template('index_vm.html', message=message)
@@ -110,6 +118,9 @@ def download_model():
     else:
       message = 'Training job status: ' + status
       return render_template('index_vm.html', message=message)
+  else:
+    message = 'You haven\'t submitted training job yet!'
+    return render_template('index_vm.html', message=message)
 
 @app.route('/delete_bucket', methods=['POST'])
 def delete_bucket():
@@ -123,27 +134,32 @@ def delete_bucket():
 
 @app.route('/tensorboard', methods=['POST'])
 def enable_tensorboard():
-  #if 'JOB_NAME' in os.environ:
-    #status = helper_functions.check_job_status(os.environ['JOB_NAME'])
-    status = 'RUNNING'
+  job_name = subprocess.check_output('$JOB_NAME', shell=True)
+  if job_name:
+    status = helper_functions.check_job_status(job_name)
     if status == 'JOB_NOT_EXIST':
       message = 'You haven\'t submitted training job yet!'
       return render_template('index_vm.html', message=message)
     elif status == 'RUNNING':
-        tensorboard_command = ('tensorboard --logdir ' +
-                               app.config['BUCKET_NAME'] + '/model ' +
-                               '--port 6006 --bind_all &')
-        os.system(tensorboard_command)
-        link = subprocess.check_output('gcloud compute instances describe ddsp-docker --zone=europe-west4-a'
-                  '--format=\'get(networkInterfaces[0].accessConfigs[0].natIP)\'')
-        link = 'http://' + link + ':6006/'
-        return render_template('index_vm.html', link=link)
+      tensorboard_command = ('tensorboard --logdir ' +
+                             app.config['BUCKET_NAME'] + '/model ' +
+                             '--port 6006 --bind_all &')
+      os.system(tensorboard_command)
+      get_ip_command = ('gcloud compute instances describe ddsp-docker '
+                        '--zone=europe-west4-a '
+                        '--format=\'get(networkInterfaces[0]'
+                        '.accessConfigs[0].natIP)\'')
+      link = subprocess.check_output(get_ip_command, shell=True)
+      link = str(link)
+      link = link[2:-3]
+      link = 'http://' + link + ':6006/'
+      return render_template('index_vm.html', link=link)
     else:
       message = 'Training job status: ' + status
       return render_template('index_vm.html', message=message)
-  #else:
-   # message = 'You haven\'t submitted training job yet!'
-    #return render_template('index_vm.html', message=message)
+  else:
+    message = 'You haven\'t submitted training job yet!'
+    return render_template('index_vm.html', message=message)
 
 if __name__ == '__main__':
   app.run(host='127.0.0.1', port=8080, debug=True)
