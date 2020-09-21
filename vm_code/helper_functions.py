@@ -154,6 +154,9 @@ def submit_job(request, bucket_name, region):
     if "master_config.image_uri Error" in str(command_err):
       return "DOCKER_IMAGE_ERROR"
 
+    if "Quota" in str(command_err):
+      return "QUOTA_ERROR"
+
     if "ERROR" not in str(command_err):
       return "JOB_SUBMITTED"
 

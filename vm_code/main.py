@@ -72,6 +72,10 @@ def job_submission():
     message = (
         'Docker image is not ready for training. '
         'Try once more in a minute!')
+  elif status == 'QUOTA_ERROR':
+    message = (
+        'Your project doesn\'t have enough quota '
+        'for this setup. Try smaller batch size!')
   elif status == 'JOB_SUBMITTED':
     message = 'Training started successfully!'
   elif status == 'PREPROCESSING_NOT_FINISHED':

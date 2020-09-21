@@ -4,7 +4,7 @@
 trainingInput:
   scaleTier: CUSTOM
   # Configures a single worker with 2 NVIDIA T4 GPUs
-  masterType: n1-highcpu-16
+  masterType: n1-highcpu-32
   masterConfig:
     acceleratorConfig:
       count: 2
