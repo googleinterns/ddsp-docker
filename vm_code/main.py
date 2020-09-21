@@ -112,6 +112,9 @@ def download_model():
     else:
       message = 'Training job status: ' + status
       return render_template('index_vm.html', message=message)
+  else:
+    message = 'You haven\'t submitted training job yet!'
+    return render_template('index_vm.html', message=message)
 
 @app.route('/delete_bucket', methods=['POST'])
 def delete_bucket():
