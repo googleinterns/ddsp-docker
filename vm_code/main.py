@@ -90,9 +90,8 @@ def job_submission():
 
 @app.route('/check_status', methods=['POST'])
 def check_status():
-  job_name = subprocess.check_output('$JOB_NAME', shell=True)
-  if job_name:
-    status = helper_functions.check_job_status(job_name)
+  if 'JOB_NAME' in os.environ:
+    status = helper_functions.check_job_status(os.environ['JOB_NAME'])
     if status == 'JOB_NOT_EXIST':
       message = 'You haven\'t submitted training job yet!'
     else:
@@ -104,9 +103,8 @@ def check_status():
 
 @app.route('/download', methods=['POST'])
 def download_model():
-  job_name = subprocess.check_output('$JOB_NAME', shell=True)
-  if job_name:
-    status = helper_functions.check_job_status(job_name)
+  if 'JOB_NAME' in os.environ:
+    status = helper_functions.check_job_status(os.environ['JOB_NAME'])
     if status == 'JOB_NOT_EXIST':
       message = 'You haven\'t submitted training job yet!'
       return render_template('index_vm.html', message=message)
@@ -134,9 +132,8 @@ def delete_bucket():
 
 @app.route('/tensorboard', methods=['POST'])
 def enable_tensorboard():
-  job_name = subprocess.check_output('$JOB_NAME', shell=True)
-  if job_name:
-    status = helper_functions.check_job_status(job_name)
+  if 'JOB_NAME' in os.environ:
+    status = helper_functions.check_job_status(os.environ['JOB_NAME'])
     if status == 'JOB_NOT_EXIST':
       message = 'You haven\'t submitted training job yet!'
       return render_template('index_vm.html', message=message)

@@ -74,7 +74,7 @@ def run_preprocessing(bucket_name, region):
   config_file = os.path.join(
       os.getcwd(),
       "../magenta_docker/config_single_vm.yaml")
-  image_uri = subprocess.check_output("$PREPROCESSING_IMAGE_URI", shell=True)
+  image_uri = os.environ["PREPROCESSING_IMAGE_URI"]
   job_submission_command = (
       "gcloud ai-platform jobs submit training " + job_name +
       " --region " + region +
@@ -100,13 +100,10 @@ def run_preprocessing(bucket_name, region):
 
 def submit_job(request, bucket_name, region):
   """Submits training job to AI Platform"""
-  preprocessing_job_name = subprocess.check_output("$PREPROCESSING_JOB_NAME",
-                                                   shell=True)
-  if not preprocessing_job_name:
+  if "PREPROCESSING_JOB_NAME" not in os.environ:
     return "PREPROCESSING_NOT_SUBMITTED"
 
-  job_name = subprocess.check_output("$PREPROCESSING_JOB_NAME", shell=True)
-  preprocessing_status = check_job_status(job_name)
+  preprocessing_status = check_job_status(os.environ["PREPROCESSING_JOB_NAME"])
   if preprocessing_status in ["RUNNING", "QUEUED", "PREPARING"]:
     return "PREPROCESSING_NOT_FINISHED"
 
@@ -133,7 +130,7 @@ def submit_job(request, bucket_name, region):
       config_file = os.path.join(
             os.getcwd(),
             "../magenta_docker/config_multiple_vms.yaml")
-    image_uri = subprocess.check_output("$IMAGE_URI", shell=True)
+    image_uri = os.environ["IMAGE_URI"]
     early_stop_loss_value = str(request.form["early_stop_loss_value"])
     job_submission_command = (
         "gcloud ai-platform jobs submit training " + job_name +
