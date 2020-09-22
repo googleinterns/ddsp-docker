@@ -98,9 +98,7 @@ function insertDisk() {
             'sizeGb': '40'
         }
     });
-    request.execute(function (resp) {
-        // Code to handle response
-    });
+    request.execute(function (resp) {});
 }
 
 function insertInstance() {
@@ -128,16 +126,18 @@ function insertInstance() {
             'items': [
                 {
                     'key': 'startup-script',
-                    'value': '#! /bin/bash\n\
-                        curl -sSO https://dl.google.com/cloudagents/install-logging-agent.sh\n\
-                        sudo bash install-logging-agent.sh\n\
-                        apt update\n\
-                        apt -y install unzip\n\
-                        wget https://github.com///googleinterns/ddsp-docker/archive/web-interface.zip\n\
-                        unzip web-interface.zip\n\
-                        mv ddsp-docker-web-interface /opt/app\n\
-                        cd /opt/app\n\
-                        source setup.sh'
+                    'value': '#! /bin/bash\n' +
+                        'curl -sSO https://dl.google.com/cloudagents/' +
+                        'install-logging-agent.sh\n' +
+                        'sudo bash install-logging-agent.sh\n' +
+                        'apt update\n' +
+                        'apt -y install unzip\n' +
+                        'wget https://github.com/googleinterns/' +
+                        'ddsp-docker/archive/web-interface.zip\n' +
+                        'unzip web-interface.zip\n' +
+                        'mv ddsp-docker-web-interface /opt/app\n' +
+                        'cd /opt/app\n' +
+                        'source setup.sh'
                 }
             ],
         },
@@ -159,9 +159,7 @@ function insertInstance() {
         'zone': DEFAULT_ZONE,
         'resource': resource
     });
-    request.execute(function (resp) {
-        // Code to handle response
-    });
+    request.execute(function (resp) {});
 }
 
 function setUpVM() {
@@ -169,10 +167,20 @@ function setUpVM() {
     setTimeout(insertInstance, 5000);
 }
 
-function executeRequest(request, trialCounter = 4, successFunction, failureFunction) {
+function executeRequest(
+    request,
+    trialCounter = 4,
+    successFunction,
+    failureFunction) {
     request.execute(function (resp) {
         if (resp.error && trialCounter > 0) {
-            setTimeout(() => { executeRequest(request, trialCounter - 1, successFunction, failureFunction) }, 5000);
+            setTimeout(() => { 
+                executeRequest(
+                    request,
+                    trialCounter - 1,
+                    successFunction,
+                    failureFunction)},
+                    5000);
         }
         else if (resp.error) {
             failureFunction();
@@ -193,11 +201,13 @@ function getInstance() {
         request,
         4,
         function (resp) {
-            vmAddress = resp.result['networkInterfaces'][0]['accessConfigs'][0]['natIP'];
+            vmAddress = 
+                resp.result['networkInterfaces'][0]['accessConfigs'][0]['natIP'];
             window.open('http://' + vmAddress + ':8080', '_blank');
         },
         () => {
-            window.alert('Couldn\'t access VM :(\nTry setting it up once more!');
+            window.alert('Couldn\'t access VM :(\n' +
+                'Try setting it up once more!');
         });
 }
 
@@ -207,9 +217,7 @@ function deleteInstance() {
         'zone': DEFAULT_ZONE,
         'instance': DEFAULT_NAME
     });
-    request.execute(function (resp) {
-        // Code to handle response
-    });
+    request.execute(function (resp) {});
 }
 
 function deleteDisk() {
@@ -225,7 +233,8 @@ function deleteDisk() {
             window.alert('Successfully cleaned up environment');
         },
         () => {
-            window.alert('There was a problem while cleaning up :(\nTry once more!');
+            window.alert('There was a problem while cleaning up :(\n' +
+                'Try once more!');
         });
 }
 
