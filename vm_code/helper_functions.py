@@ -65,8 +65,6 @@ def run_preprocessing(bucket_name, region):
   job_name = (
       "preprocessing_job_" +
       str(int((datetime.now()-datetime(1970, 1, 1)).total_seconds())))
-  set_job_name = "export PREPROCESSING_JOB_NAME=" + job_name
-  os.system(set_job_name)
   input_audio_filepatterns = os.path.join(bucket_name, "audio/*")
   output_tfrecord_path = os.path.join(bucket_name, "tf_record/train.tfrecord")
   statistics_path = os.path.join(bucket_name, "model/")
@@ -94,16 +92,16 @@ def run_preprocessing(bucket_name, region):
   if "master_config.image_uri Error" in str(command_err):
     return "DOCKER_IMAGE_ERROR"
   if "ERROR" not in str(command_err):
-    return "JOB_SUBMITTED"
+    return job_name
 
   return "ERROR"
 
-def submit_job(request, bucket_name, region):
+def submit_job(request, bucket_name, region, preprocessing_job_name):
   """Submits training job to AI Platform"""
-  if "PREPROCESSING_JOB_NAME" not in os.environ:
+  if not preprocessing_job_name:
     return "PREPROCESSING_NOT_SUBMITTED"
 
-  preprocessing_status = check_job_status(os.environ["PREPROCESSING_JOB_NAME"])
+  preprocessing_status = check_job_status(preprocessing_job_name)
   if preprocessing_status in ["RUNNING", "QUEUED", "PREPARING"]:
     return "PREPROCESSING_NOT_FINISHED"
 
@@ -112,8 +110,6 @@ def submit_job(request, bucket_name, region):
     job_name = (
         "training_job_" +
         str(int((datetime.now()-datetime(1970, 1, 1)).total_seconds())))
-    set_job_name = "export JOB_NAME=" + job_name
-    os.system(set_job_name)
     if str(request.form["batch_size"]) in ["8", "16"]:
       config_file = os.path.join(
             os.getcwd(),
@@ -159,7 +155,7 @@ def submit_job(request, bucket_name, region):
       return "QUOTA_ERROR"
 
     if "ERROR" not in str(command_err):
-      return "JOB_SUBMITTED"
+      return job_name
 
     return "ERROR"
 

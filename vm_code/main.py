@@ -19,7 +19,8 @@ app.config['REGION'] = 'europe-west4'
 app.config['BUCKET_NAME'] = (
     'gs://ddsp-train-' +
     str(int((datetime.now()-datetime(1970, 1, 1)).total_seconds())))
-app.config['TENSORBOARD_ID'] = ''
+app.config['PREPROCESSING_JOB_NAME'] = ''
+app.config['JOB_NAME'] = ''
 
 # Create a directory in a known location to save files to.
 uploads_dir = os.path.join(app.instance_path, app.config['UPLOAD_PATH'])
@@ -55,10 +56,11 @@ def preprocess():
     message = (
         'Docker image is not ready for preprocessing. '
         'Try once more in a minute!')
-  elif status == 'JOB_SUBMITTED':
-    message = 'Preprocessing started successfully!'
-  else:
+  elif status == 'ERROR':
     message = 'There was a problem running preprocessing. Try once more!'
+  else:
+    app.config['PREPROCESSING_JOB_NAME'] = status
+    message = 'Preprocessing started successfully!'
   return render_template('index_vm.html', message=message)
 
 @app.route('/submit', methods=['POST'])
@@ -67,7 +69,8 @@ def job_submission():
   status = helper_functions.submit_job(
       request,
       app.config['BUCKET_NAME'],
-      app.config['REGION'])
+      app.config['REGION'],
+      app.config['PREPROCESSING_JOB_NAME'])
   if status == 'DOCKER_IMAGE_ERROR':
     message = (
         'Docker image is not ready for training. '
@@ -76,8 +79,8 @@ def job_submission():
     message = (
         'Your project doesn\'t have enough quota '
         'for this setup. Try smaller batch size!')
-  elif status == 'JOB_SUBMITTED':
-    message = 'Training started successfully!'
+  elif status == 'ERROR':
+    message = 'There was a problem starting training. Try once more!'
   elif status == 'PREPROCESSING_NOT_FINISHED':
     message = 'Preprocessing is not yet finished. Try once more in a minute!'
   elif status == 'PREPROCESSING_ERROR':
@@ -85,13 +88,14 @@ def job_submission():
   elif status == 'PREPROCESSING_NOT_SUBMITTED':
     message = 'You haven\'t preprocessed the data!'
   else:
-    message = 'There was a problem starting training. Try once more!'
+    app.config['JOB_NAME'] = status
+    message = 'Training started successfully!'
   return render_template('index_vm.html', message=message)
 
 @app.route('/check_status', methods=['POST'])
 def check_status():
-  if 'JOB_NAME' in os.environ:
-    status = helper_functions.check_job_status(os.environ['JOB_NAME'])
+  if app.config['JOB_NAME']:
+    status = helper_functions.check_job_status(app.config['JOB_NAME'])
     if status == 'JOB_NOT_EXIST':
       message = 'You haven\'t submitted training job yet!'
     else:
@@ -103,8 +107,8 @@ def check_status():
 
 @app.route('/download', methods=['POST'])
 def download_model():
-  if 'JOB_NAME' in os.environ:
-    status = helper_functions.check_job_status(os.environ['JOB_NAME'])
+  if app.config['JOB_NAME']:
+    status = helper_functions.check_job_status(app.config['JOB_NAME'])
     if status == 'JOB_NOT_EXIST':
       message = 'You haven\'t submitted training job yet!'
       return render_template('index_vm.html', message=message)
@@ -132,8 +136,8 @@ def delete_bucket():
 
 @app.route('/tensorboard', methods=['POST'])
 def enable_tensorboard():
-  if 'JOB_NAME' in os.environ:
-    status = helper_functions.check_job_status(os.environ['JOB_NAME'])
+  if app.config['JOB_NAME']:
+    status = helper_functions.check_job_status(app.config['JOB_NAME'])
     if status == 'JOB_NOT_EXIST':
       message = 'You haven\'t submitted training job yet!'
       return render_template('index_vm.html', message=message)
