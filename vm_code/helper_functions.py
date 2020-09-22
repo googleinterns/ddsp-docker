@@ -1,11 +1,47 @@
 """Helper function for GCP communication."""
 from datetime import datetime
+import json
 import os
 import subprocess
+
 import tensorflow as tf
 from os.path import basename
 from subprocess import PIPE
 from zipfile36 import ZipFile
+
+def save_variable(name, value):
+  """Saves a variable to a file."""
+  if os.path.isfile("variables.json"):
+    with open("variables.json", "r") as json_file:
+      try:
+        variables = json.load(json_file)
+      except json.decoder.JSONDecodeError:
+        variables = {}
+  else:
+    variables = {}
+
+  with open("variables.json", "w") as json_file:
+    variables[name] = value
+    json.dump(variables, json_file)
+
+def get_all_variables():
+  """Gets all the saved variables."""
+  if not os.path.isfile("variables.json"):
+    return {}
+  with open("variables.json", "r") as json_file:
+    try:
+      variables = json.load(json_file)
+    except json.decoder.JSONDecodeError:
+      variables = {}
+
+  return variables
+
+def read_variable(name):
+  """Reads a variable form a file."""
+  with open("variables.json", "r") as json_file:
+    variables = json.load(json_file)
+
+  return variables[name]
 
 def create_bucket(bucket_name, region):
   """Creates a new bucket."""
@@ -51,22 +87,21 @@ def get_model(bucket_name, downloads_dir, instance_path):
   download_file(bucket_name, downloads_dir, "dataset_statistics.pkl")
 
   zip_path = os.path.join(instance_path, "model.zip")
-  with ZipFile(zip_path, "w") as zipObj:
-    for folderName, subfolders, filenames in os.walk(downloads_dir):
+  with ZipFile(zip_path, "w") as zip_obj:
+    for folder_name, _, filenames in os.walk(downloads_dir):
       for filename in filenames:
-        #create complete filepath of file in directory
-        filePath = os.path.join(folderName, filename)
-        # Add file to zip
-        zipObj.write(filePath, basename(filePath))
-    zipObj.close()
-  
+        # Creates complete filepath of file in directory
+        file_path = os.path.join(folder_name, filename)
+        # Adds file to zip
+        zip_obj.write(file_path, basename(file_path))
+    zip_obj.close()
 
 def run_preprocessing(bucket_name, region):
   """Runs preprocessing job on AI Platform"""
   job_name = (
       "preprocessing_job_" +
       str(int((datetime.now()-datetime(1970, 1, 1)).total_seconds())))
-  os.environ["PREPROCESSING_JOB_NAME"] = job_name
+  save_variable("PREPROCESSING_JOB_NAME", job_name)
   input_audio_filepatterns = os.path.join(bucket_name, "audio/*")
   output_tfrecord_path = os.path.join(bucket_name, "tf_record/train.tfrecord")
   statistics_path = os.path.join(bucket_name, "model/")
@@ -100,10 +135,11 @@ def run_preprocessing(bucket_name, region):
 
 def submit_job(request, bucket_name, region):
   """Submits training job to AI Platform"""
-  if "PREPROCESSING_JOB_NAME" not in os.environ:
+  if "PREPROCESSING_JOB_NAME" not in get_all_variables():
     return "PREPROCESSING_NOT_SUBMITTED"
 
-  preprocessing_status = check_job_status(os.environ["PREPROCESSING_JOB_NAME"])
+  preprocessing_status = check_job_status(
+      read_variable("PREPROCESSING_JOB_NAME"))
   if preprocessing_status in ["RUNNING", "QUEUED", "PREPARING"]:
     return "PREPROCESSING_NOT_FINISHED"
 
@@ -112,23 +148,23 @@ def submit_job(request, bucket_name, region):
     job_name = (
         "training_job_" +
         str(int((datetime.now()-datetime(1970, 1, 1)).total_seconds())))
-    os.environ["JOB_NAME"] = job_name
-    if str(request.form['batch_size']) in ['8', '16']:
-        config_file = os.path.join(
-            os.getcwd(),
-            "../magenta_docker/config_single_vm.yaml")
-    if str(request.form['batch_size']) == '32':
-        config_file = os.path.join(
-            os.getcwd(),
-            "../magenta_docker/config_1vm_2gpus.yaml")
-    if str(request.form['batch_size']) == '64':
-        config_file = os.path.join(
-            os.getcwd(),
-            "../magenta_docker/config_2vms_4gpus.yaml")
-    if str(request.form['batch_size']) == '128':  
-        config_file = os.path.join(
-            os.getcwd(),
-            "../magenta_docker/config_multiple_vms.yaml")
+    save_variable("JOB_NAME", job_name)
+    if str(request.form["batch_size"]) in ["8", "16"]:
+      config_file = os.path.join(
+          os.getcwd(),
+          "../magenta_docker/config_single_vm.yaml")
+    if str(request.form["batch_size"]) == "32":
+      config_file = os.path.join(
+          os.getcwd(),
+          "../magenta_docker/config_1vm_2gpus.yaml")
+    if str(request.form["batch_size"]) == "64":
+      config_file = os.path.join(
+          os.getcwd(),
+          "../magenta_docker/config_2vms_4gpus.yaml")
+    if str(request.form["batch_size"]) == "128":
+      config_file = os.path.join(
+          os.getcwd(),
+          "../magenta_docker/config_multiple_vms.yaml")
     image_uri = os.environ["IMAGE_URI"]
     early_stop_loss_value = str(request.form["early_stop_loss_value"])
     job_submission_command = (

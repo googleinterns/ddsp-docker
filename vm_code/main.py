@@ -16,10 +16,11 @@ app.config['UPLOAD_EXTENSIONS'] = ['.wav', '.mp3']
 app.config['UPLOAD_PATH'] = 'uploads'
 app.config['DOWNLOAD_PATH'] = 'downloads'
 app.config['REGION'] = 'europe-west4'
-app.config['BUCKET_NAME'] = (
+app.config['TENSORBOARD_ID'] = ''
+helper_functions.save_variable(
+    'BUCKET_NAME',
     'gs://ddsp-train-' +
     str(int((datetime.now()-datetime(1970, 1, 1)).total_seconds())))
-app.config['TENSORBOARD_ID'] = ''
 
 # Create a directory in a known location to save files to.
 uploads_dir = os.path.join(app.instance_path, app.config['UPLOAD_PATH'])
@@ -41,15 +42,17 @@ def upload_files():
         abort(400)
       uploaded_file.save(os.path.join(uploads_dir, filename))
   helper_functions.create_bucket(
-      app.config['BUCKET_NAME'],
+      helper_functions.read_variable('BUCKET_NAME'),
       app.config['REGION'])
-  helper_functions.upload_blob(app.config['BUCKET_NAME'], uploads_dir)
+  helper_functions.upload_blob(
+      helper_functions.read_variable('BUCKET_NAME'),
+      uploads_dir)
   return render_template('index_vm.html')
 
 @app.route('/preprocess', methods=['POST'])
 def preprocess():
   status = helper_functions.run_preprocessing(
-      app.config['BUCKET_NAME'],
+      helper_functions.read_variable('BUCKET_NAME'),
       app.config['REGION'])
   if status == 'DOCKER_IMAGE_ERROR':
     message = (
@@ -66,7 +69,7 @@ def job_submission():
   print(request.form)
   status = helper_functions.submit_job(
       request,
-      app.config['BUCKET_NAME'],
+      helper_functions.read_variable('BUCKET_NAME'),
       app.config['REGION'])
   if status == 'DOCKER_IMAGE_ERROR':
     message = (
@@ -90,8 +93,9 @@ def job_submission():
 
 @app.route('/check_status', methods=['POST'])
 def check_status():
-  if 'JOB_NAME' in os.environ:
-    status = helper_functions.check_job_status(os.environ['JOB_NAME'])
+  if 'JOB_NAME' in helper_functions.get_all_variables():
+    status = helper_functions.check_job_status(
+        helper_functions.read_variable('JOB_NAME'))
     if status == 'JOB_NOT_EXIST':
       message = 'You haven\'t submitted training job yet!'
     else:
@@ -103,14 +107,17 @@ def check_status():
 
 @app.route('/download', methods=['POST'])
 def download_model():
-  if 'JOB_NAME' in os.environ:
-    status = helper_functions.check_job_status(os.environ['JOB_NAME'])
+  if 'JOB_NAME' in helper_functions.get_all_variables():
+    status = helper_functions.check_job_status(
+        helper_functions.read_variable('JOB_NAME'))
     if status == 'JOB_NOT_EXIST':
       message = 'You haven\'t submitted training job yet!'
       return render_template('index_vm.html', message=message)
     elif status == 'SUCCEEDED':
-      helper_functions.get_model(app.config['BUCKET_NAME'],
-                                 downloads_dir, app.instance_path)
+      helper_functions.get_model(
+          helper_functions.read_variable('BUCKET_NAME'),
+          downloads_dir,
+          app.instance_path)
       download_zip = os.path.join(app.instance_path, 'model.zip')
       return send_file(download_zip, as_attachment=True)
     else:
@@ -122,7 +129,8 @@ def download_model():
 
 @app.route('/delete_bucket', methods=['POST'])
 def delete_bucket():
-  status = helper_functions.delete_bucket(app.config['BUCKET_NAME'])
+  status = helper_functions.delete_bucket(
+      helper_functions.read_variable('BUCKET_NAME'))
   if status == 'ERROR':
     message = 'There was a problem deleting bucket :/'
   else:
@@ -132,25 +140,27 @@ def delete_bucket():
 
 @app.route('/tensorboard', methods=['POST'])
 def enable_tensorboard():
-  if 'JOB_NAME' in os.environ:
-    status = helper_functions.check_job_status(os.environ['JOB_NAME'])
+  if 'JOB_NAME' in helper_functions.get_all_variables():
+    status = helper_functions.check_job_status(
+        helper_functions.read_variable('JOB_NAME'))
     if status == 'JOB_NOT_EXIST':
       message = 'You haven\'t submitted training job yet!'
       return render_template('index_vm.html', message=message)
     elif status == 'RUNNING':
-        tensorboard_command = ('tensorboard --logdir ' +
-                               app.config['BUCKET_NAME'] + '/model ' +
-                               '--port 6006 --bind_all &')
-        os.system(tensorboard_command)
-        get_ip_command = ("gcloud compute instances describe ddsp-docker "
-                          "--zone=europe-west4-a "
-                          "--format='get(networkInterfaces[0]"
-                          ".accessConfigs[0].natIP)'")
-        link = subprocess.check_output(get_ip_command, shell=True)
-        link = str(link)
-        link = link[2:-3]
-        link = 'http://' + link + ':6006/'
-        return render_template('index_vm.html', link=link)
+      tensorboard_command = ('tensorboard --logdir ' +
+                             helper_functions.read_variable('BUCKET_NAME') +
+                             '/model ' +
+                             '--port 6006 --bind_all &')
+      os.system(tensorboard_command)
+      get_ip_command = ('gcloud compute instances describe ddsp-docker '
+                        '--zone=europe-west4-a '
+                        '--format=\'get(networkInterfaces[0]'
+                        '.accessConfigs[0].natIP)\'')
+      link = subprocess.check_output(get_ip_command, shell=True)
+      link = str(link)
+      link = link[2:-3]
+      link = 'http://' + link + ':6006/'
+      return render_template('index_vm.html', link=link)
     else:
       message = 'Training job status: ' + status
       return render_template('index_vm.html', message=message)
