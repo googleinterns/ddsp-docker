@@ -1,4 +1,5 @@
 """Main app script."""
+
 from datetime import datetime
 import os
 import subprocess

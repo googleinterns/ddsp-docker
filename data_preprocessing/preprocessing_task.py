@@ -30,7 +30,7 @@ def main(unused_argv):
 
   subprocess.run(args=preprocess_command, check=True)
 
-  # Compute statistics for timbre transfer
+  # Computes statistics for timbre transfer
   tfrecord_filepattern = (
       os.path.split(FLAGS.output_tfrecord_path)[0] +
       '/train.tfrecord*')

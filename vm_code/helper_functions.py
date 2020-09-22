@@ -1,4 +1,5 @@
 """Helper function for GCP communication."""
+
 from datetime import datetime
 import json
 import os
