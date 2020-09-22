@@ -58,10 +58,11 @@ def preprocess():
     message = (
         'Docker image is not ready for preprocessing. '
         'Try once more in a minute!')
-  elif status == 'JOB_SUBMITTED':
-    message = 'Preprocessing started successfully!'
-  else:
+  elif status == 'ERROR':
     message = 'There was a problem running preprocessing. Try once more!'
+  else:
+    app.config['PREPROCESSING_JOB_NAME'] = status
+    message = 'Preprocessing started successfully!'
   return render_template('index_vm.html', message=message)
 
 @app.route('/submit', methods=['POST'])
@@ -79,8 +80,8 @@ def job_submission():
     message = (
         'Your project doesn\'t have enough quota '
         'for this setup. Try smaller batch size!')
-  elif status == 'JOB_SUBMITTED':
-    message = 'Training started successfully!'
+  elif status == 'ERROR':
+    message = 'There was a problem starting training. Try once more!'
   elif status == 'PREPROCESSING_NOT_FINISHED':
     message = 'Preprocessing is not yet finished. Try once more in a minute!'
   elif status == 'PREPROCESSING_ERROR':
@@ -88,7 +89,8 @@ def job_submission():
   elif status == 'PREPROCESSING_NOT_SUBMITTED':
     message = 'You haven\'t preprocessed the data!'
   else:
-    message = 'There was a problem starting training. Try once more!'
+    app.config['JOB_NAME'] = status
+    message = 'Training started successfully!'
   return render_template('index_vm.html', message=message)
 
 @app.route('/check_status', methods=['POST'])

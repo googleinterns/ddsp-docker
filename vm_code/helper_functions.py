@@ -128,8 +128,9 @@ def run_preprocessing(bucket_name, region):
 
   if "master_config.image_uri Error" in str(command_err):
     return "DOCKER_IMAGE_ERROR"
+
   if "ERROR" not in str(command_err):
-    return "JOB_SUBMITTED"
+    return "JOB_SUBMITTED_SUCCESSFULLY"
 
   return "ERROR"
 
@@ -140,6 +141,7 @@ def submit_job(request, bucket_name, region):
 
   preprocessing_status = check_job_status(
       read_variable("PREPROCESSING_JOB_NAME"))
+
   if preprocessing_status in ["RUNNING", "QUEUED", "PREPARING"]:
     return "PREPROCESSING_NOT_FINISHED"
 
@@ -194,7 +196,7 @@ def submit_job(request, bucket_name, region):
       return "QUOTA_ERROR"
 
     if "ERROR" not in str(command_err):
-      return "JOB_SUBMITTED"
+      return "JOB_SUBMITTED_SUCCESSFULLY"
 
     return "ERROR"
 
