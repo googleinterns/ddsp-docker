@@ -21,10 +21,46 @@ var DEFAULT_MACHINE_URL;
 var DEFAULT_NETWORK;
 var DEFAULT_SUBNETWORK;
 
+/**
+ * Initializes an GCE API.
+ **/
 function initializeApi() {
     gapi.client.load('compute', API_VERSION);
 }
 
+/**
+ * Takes @param {num} trailCounter attempts to execute the @param request.
+ * Calls @param {function()} successFunction if the request succeds or 
+ * @param {function()} failureFunction if all the request attempts fail.
+ **/
+function executeRequest(
+    request,
+    trialCounter = 4,
+    successFunction,
+    failureFunction) {
+    request.execute(function (resp) {
+        if (resp.error && trialCounter > 0) {
+            setTimeout(() => { 
+                executeRequest(
+                    request,
+                    trialCounter - 1,
+                    successFunction,
+                    failureFunction)},
+                    5000);
+        }
+        else if (resp.error) {
+            failureFunction();
+        }
+        else {
+            successFunction(resp);
+        }
+    });
+}
+
+/**
+ * Authorizes the user to use GCE API through DDSP Docker 
+ * web interface.
+ **/
 function authorization() {
     if (checkFormFilledIn()) {
         gapi.client.setApiKey(API_KEY);
@@ -47,15 +83,26 @@ function authorization() {
     }
 }
 
+/**
+ * Makes element with @param {string} idToHide hide and instead shows 
+ * element with @param {string} idToShow.
+ **/
 function switchComponents(idToShow, idToHide) {
     document.getElementById(idToShow).style.display = 'block';
     document.getElementById(idToHide).style.display = 'none';
 }
 
+/**
+ * Makes sure that login form got filled in.
+ **/
 function checkFormFilledIn() {
     return PROJECT_ID != "" && CLIENT_ID != "" && API_KEY != "";
 }
 
+/**
+ * Sets all needed global variables describing the disk and VM instance 
+ * and logs in the user. 
+ **/
 function logIn() {
     PROJECT_ID = document.getElementById("project_id").value;
     CLIENT_ID = document.getElementById("client_id").value;
@@ -88,6 +135,9 @@ function logIn() {
     authorization();
 }
 
+/**
+ * Inserts the disk. 
+ **/
 function insertDisk() {
     var request = gapi.client.compute.disks.insert({
         'project': DEFAULT_PROJECT,
@@ -101,6 +151,9 @@ function insertDisk() {
     request.execute(function (resp) {});
 }
 
+/**
+ * Inserts the VM instance and defines its startup script. 
+ **/
 function insertInstance() {
     resource = {
         'name': DEFAULT_NAME,
@@ -162,35 +215,17 @@ function insertInstance() {
     request.execute(function (resp) {});
 }
 
+/**
+ * Ties up disk and VM setup.
+ **/
 function setUpVM() {
     insertDisk();
     setTimeout(insertInstance, 5000);
 }
 
-function executeRequest(
-    request,
-    trialCounter = 4,
-    successFunction,
-    failureFunction) {
-    request.execute(function (resp) {
-        if (resp.error && trialCounter > 0) {
-            setTimeout(() => { 
-                executeRequest(
-                    request,
-                    trialCounter - 1,
-                    successFunction,
-                    failureFunction)},
-                    5000);
-        }
-        else if (resp.error) {
-            failureFunction();
-        }
-        else {
-            successFunction(resp);
-        }
-    });
-}
-
+/**
+ * Makes a request for information about the VM instance.
+ **/
 function getInstance() {
     var request = gapi.client.compute.instances.get({
         'project': DEFAULT_PROJECT,
@@ -211,6 +246,9 @@ function getInstance() {
         });
 }
 
+/**
+ * Deletes the VM instance.
+ **/
 function deleteInstance() {
     var request = gapi.client.compute.instances.delete({
         'project': DEFAULT_PROJECT,
@@ -220,6 +258,9 @@ function deleteInstance() {
     request.execute(function (resp) {});
 }
 
+/**
+ * Deletes the disk.
+ **/
 function deleteDisk() {
     var request = gapi.client.compute.disks.delete({
         'project': DEFAULT_PROJECT,
@@ -238,6 +279,9 @@ function deleteDisk() {
         });
 }
 
+/**
+ * Ties up VM and disk deletion.
+ **/
 function cleanUp() {
     deleteInstance();
     setTimeout(deleteDisk, 10000);
