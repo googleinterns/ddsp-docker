@@ -34,23 +34,32 @@ If you are a new GCP user you will get $300 to spend on it. That's more than eno
 1. Go to https://googleinterns.github.io/ddsp-docker.
 2. Type in your **Project ID**, copy the **API key**, and **Client ID** you've just created, and click log in.
 
+![](https://raw.githubusercontent.com/googleinterns/ddsp-docker/web-interface/documentation_images/login.png)
+
 ## Web Interface
-Here you will find some tips on the pipeline of using the Web Interface.
+Here you will find some tips on the pipeline of using the [DDSP Docker web interface](https://googleinterns.github.io/ddsp-docker/).
 
 ### Set up a Google Compute Engine VM
 1. **Activate GCE API** by clicking the link on the webpage and following the next instructions.
 2. Click the **Create VM** button.
 3. Click the **Go to VM** button. As creating a VM takes a while, you may need to wait a little bit before accessing it.
 
+![](https://raw.githubusercontent.com/googleinterns/ddsp-docker/web-interface/documentation_images/setup_vm.png)
+
 ### Preprocess your audio data
 1. Upload .mp3 or .wav files. It should be 10-20 minutes of audio from a single monophonic source (also, one acoustic environment).
 2. Click the **Preprocess button**. Preprocessing the data should take around 10-15 minutes. Note that you may need to wait here for a while as some setup processes may still be running in the background and they need to be completed before submitting the preprocessing job.
+
+![](https://raw.githubusercontent.com/googleinterns/ddsp-docker/web-interface/documentation_images/file_upload.png)
 
 ### Run training job on AI Platform
 1. Choose the training parameters.
 2. Click the **Submit** button.
 3. Check training job status by clicking the **Check training job status** button.
-4. Observe the training process using TensorBoard. Refresh TensorBoard by clicking the **Upload new logs to TensorBoard** button.
+4. Observe the training process using TensorBoard. Refresh TensorBoard by clicking the **Upload new logs to TensorBoard** button and following a **Observe your experiment on TensorBoard** link.
+
+![](https://raw.githubusercontent.com/googleinterns/ddsp-docker/web-interface/documentation_images/tensorboard.png)
+![](https://raw.githubusercontent.com/googleinterns/ddsp-docker/web-interface/documentation_images/tensorboard_graphs.png)
 
 #### Training notes:
 * Models typically perform well when the loss drops to the range of ~4.5-5.0.
@@ -61,6 +70,10 @@ Here you will find some tips on the pipeline of using the Web Interface.
 1. Click the **Download model** button.
 2. You are now ready to use [DDSP Timbre Transfer Colab](https://colab.research.google.com/github/magenta/ddsp/blob/master/ddsp/colab/demos/timbre_transfer.ipynb).
 
+![](https://raw.githubusercontent.com/googleinterns/ddsp-docker/web-interface/documentation_images/model_downloaded.png)
+
 ### Clean up the environment
 1. Click the **Delete bucket** button.
 2. Return to the [login webpage](https://googleinterns.github.io/ddsp-docker), login once more if necessary, and click the **Clean up** button.
+
+![](https://raw.githubusercontent.com/googleinterns/ddsp-docker/web-interface/documentation_images/clean_up.png)
