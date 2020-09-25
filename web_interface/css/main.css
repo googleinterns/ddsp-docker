@@ -1155,6 +1155,7 @@ table:not(.no-borders) tr:nth-child(odd) {
 input[type="file"] {
     display: none;
 }
+
 input[type="submit"] {
     display: none;
 }
