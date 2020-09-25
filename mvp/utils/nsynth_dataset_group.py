@@ -21,9 +21,18 @@ flags.DEFINE_string('input_dir', None,
 flags.DEFINE_string('output_dir', None,
                     'Path were compressed folders will be stored.')
 
+# Example filename matching: instrument_category_012-345-678.wav
 FILENAME_REGEX = re.compile(r'_[0-9\-]{11}\.wav')
 
 def compress_files(input_directory, output_directory):
+  """Groups the .wav files based on instrument in the filename.
+    Compresses them into into .tar.gz files.
+    Args:
+        input_directory:
+          A directory where files we want to compress are stored.
+        output_directory:
+          A directory where compressed folders will be stored.
+  """
   instruments = {}
 
   for filename in os.listdir(input_directory):
